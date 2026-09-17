@@ -1317,6 +1317,63 @@ document.getElementById('addHolidayBtn').addEventListener('click', ()=>{
   }
 });
 
+async function ensurePendingTutorRegistration() {
+  let token = localStorage.getItem('shuleTutorToken');
+  if (token) return token;
+
+  const draftFields = [
+    ['f-name', v => v.trim().length > 2],
+    ['f-email', v => isValidEmail(v)],
+    ['f-password', v => v.length >= 6],
+    ['f-tsc', v => v.trim().length >= 4],
+    ['f-id', v => v.trim().length >= 5],
+    ['f-whatsapp', v => isValidKenyanPhone(normalizePhone(v))],
+    ['f-county', v => v !== ""],
+  ];
+
+  let valid = true;
+  draftFields.forEach(([id, test]) => {
+    const el = document.getElementById(id);
+    const field = el.closest('.field');
+    if (!test(el.value)) {
+      field.classList.add('has-error');
+      valid = false;
+    } else {
+      field.classList.remove('has-error');
+    }
+  });
+
+  if (editSubjects.length === 0) {
+    document.getElementById('f-subject').closest('.field').classList.add('has-error');
+    valid = false;
+  }
+
+  if (!valid) {
+    throw new Error('Please complete the tutor registration details before paying.');
+  }
+
+  const result = await apiFetch('/api/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({
+      fullName: document.getElementById('f-name').value.trim(),
+      email: document.getElementById('f-email').value.trim(),
+      whatsapp: normalizePhone(document.getElementById('f-whatsapp').value),
+      password: document.getElementById('f-password').value,
+      tscNumber: document.getElementById('f-tsc').value.trim(),
+      idNumber: document.getElementById('f-id').value.trim(),
+      county: document.getElementById('f-county').value,
+      hourlyRate: Number(document.getElementById('f-rate').value) || 500,
+      subjects: [...editSubjects],
+      availability: JSON.parse(JSON.stringify(editAvailability)),
+      holidays: [...editHolidays],
+    }),
+  });
+
+  localStorage.setItem('shuleTutorToken', result.token);
+  currentTutor = normalizeTutorRow(result.tutor);
+  return result.token;
+}
+
 document.getElementById('paySTKBtn').addEventListener('click', async (e)=>{
   const phone = normalizePhone(document.getElementById('f-mpesa').value);
   if(!isValidKenyanPhone(phone)){
@@ -1327,10 +1384,12 @@ document.getElementById('paySTKBtn').addEventListener('click', async (e)=>{
   const button = e.target;
   const status = document.getElementById('stkStatus');
   const text = document.getElementById('stkStatusText');
-  const token = localStorage.getItem('shuleTutorToken');
+  let token = localStorage.getItem('shuleTutorToken');
 
-  if (!token) {
-    toast('Please log in before sending the M-Pesa prompt.');
+  try {
+    token = await ensurePendingTutorRegistration();
+  } catch (error) {
+    toast(error.message || 'Registration details are incomplete.');
     return;
   }
 
@@ -1429,6 +1488,11 @@ document.getElementById('tutorForm').addEventListener('submit', async (e)=>{
   }
   if(!valid){ toast("Please fix the highlighted fields."); return; }
   if(!tutorFeePaid){ toast("Please complete the KES 1,000 annual payment first."); return; }
+
+  if (currentTutor && currentTutor.id) {
+    toast('Your account was created and is now waiting for activation after the M-Pesa callback.');
+    return;
+  }
 
   try {
     const result = await apiFetch('/api/auth/register', {
