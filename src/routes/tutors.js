@@ -14,7 +14,12 @@ function normalizeAvailability(rows) {
   rows.forEach((row) => {
     if (DAY_NAMES[row.day_of_week]) {
       const day = DAY_NAMES[row.day_of_week];
-      const slotIndex = SLOT_LABELS.indexOf(row.slot_label);
+      const normalizedSlot = String(row.slot_label || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+      const slotIndex = SLOT_LABELS.findIndex((slot) =>
+        slot.toLowerCase().replace(/[^a-z0-9]/g, '') === normalizedSlot
+      );
       if (slotIndex >= 0) {
         days[day][slotIndex] = row.is_available;
       }
