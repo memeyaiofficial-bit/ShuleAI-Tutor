@@ -47,6 +47,36 @@ FROM (
 JOIN tutors t ON t.email = v.email
 ON CONFLICT (tutor_id, subject_name) DO NOTHING;
 
+INSERT INTO tutor_availability (tutor_id, day_of_week, slot_label, is_available)
+SELECT t.id, v.day_of_week, v.slot_label, TRUE
+FROM (
+  VALUES
+    ('jane.wanjiru@example.com', 0, '6–8am'),
+    ('jane.wanjiru@example.com', 1, '8–10am'),
+    ('jane.wanjiru@example.com', 2, '2–4pm'),
+    ('jane.wanjiru@example.com', 5, '6–8pm'),
+    ('david.mutua@example.com', 1, '10am–12pm'),
+    ('david.mutua@example.com', 3, '4–6pm'),
+    ('david.mutua@example.com', 4, '8–10am'),
+    ('faith.otieno@example.com', 0, '2–4pm'),
+    ('faith.otieno@example.com', 2, '6–8pm'),
+    ('faith.otieno@example.com', 5, '8–10am'),
+    ('grace.achieng@example.com', 1, '6–8pm'),
+    ('grace.achieng@example.com', 3, '10am–12pm'),
+    ('grace.achieng@example.com', 4, '2–4pm'),
+    ('peter.mungai@example.com', 0, '4–6pm'),
+    ('peter.mungai@example.com', 2, '10am–12pm'),
+    ('peter.mungai@example.com', 5, '6–8pm'),
+    ('lucy.njeri@example.com', 1, '2–4pm'),
+    ('lucy.njeri@example.com', 3, '6–8pm'),
+    ('lucy.njeri@example.com', 4, '10am–12pm'),
+    ('samuel.kariuki@example.com', 2, '8–10am'),
+    ('samuel.kariuki@example.com', 5, '10am–12pm'),
+    ('samuel.kariuki@example.com', 6, '6–8pm')
+) AS v(email, day_of_week, slot_label)
+JOIN tutors t ON t.email = v.email
+ON CONFLICT (tutor_id, day_of_week, slot_label) DO NOTHING;
+
 INSERT INTO bookings (
   tutor_id,
   parent_name,

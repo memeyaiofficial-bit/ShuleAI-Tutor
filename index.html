@@ -1094,6 +1094,8 @@ function buildReadonlyGrid(teacher, selectable){
 function renderBookingStep1(){
   const t = bookingState.teacher;
   const body = document.getElementById('bookingModalBody');
+  const hasAvailableSlots = DAYS.some(day => SLOTS.some((_, sIdx) => Boolean(t.availability?.[day]?.[sIdx])));
+
   body.innerHTML = `
     <div class="step-dots"><span class="active"></span><span></span><span></span></div>
     <h3>Choose a session</h3>
@@ -1102,11 +1104,14 @@ function renderBookingStep1(){
       <div class="avatar" style="background:${colorFor(t.name)}">${initials(t.name)}</div>
       <div><b>${t.name}</b><br><small>${t.subjects.join(', ')} · ${t.county} · KES ${t.rate}/hr</small></div>
     </div>
-    <div class="avail-wrap">${buildReadonlyGrid(t, true)}</div>
+    ${hasAvailableSlots ? `<div class="avail-wrap">${buildReadonlyGrid(t, true)}</div>` : `<p class="sub" style="margin-top:12px;">This tutor has not published any slots yet. Please try another teacher.</p>`}
     <div class="form-actions">
-      <button class="btn btn-primary" id="toStep2Btn" disabled>Continue to details</button>
+      <button class="btn btn-primary" id="toStep2Btn" ${hasAvailableSlots ? '' : 'disabled'}>Continue to details</button>
     </div>
   `;
+
+  if (!hasAvailableSlots) return;
+
   body.querySelectorAll('.slot-cell[data-day]').forEach(cell=>{
     cell.addEventListener('click', ()=>{
       bookingState.day = cell.dataset.day;
@@ -1431,6 +1436,8 @@ document.getElementById('paySTKBtn').addEventListener('click', async (e)=>{
         }
 
         if (paymentStatus && (paymentStatus.isCancelled || paymentStatus.isFailed || paymentStatus.normalizedStatus === 'FAILED' || paymentStatus.normalizedStatus === 'CANCELLED')) {
+          status.classList.remove('is-visible');
+          status.classList.remove('success');
           text.textContent = 'The M-Pesa payment was cancelled or was not successful. Please try again.';
           button.disabled = false;
           button.textContent = 'Send M-Pesa Prompt';
