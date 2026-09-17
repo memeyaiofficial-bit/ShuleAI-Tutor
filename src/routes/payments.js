@@ -1,0 +1,234 @@
+const express = require('express');
+const { query } = require('../db');
+const { authRequired } = require('../auth');
+
+const router = express.Router();
+
+function getDarajaBaseUrl() {
+  const env = (process.env.MPESA_ENVIRONMENT || 'sandbox').toLowerCase();
+  return env === 'production' ? 'https://api.safaricom.co.ke' : 'https://sandbox.safaricom.co.ke';
+}
+
+function hasDarajaConfig() {
+  return Boolean(
+    process.env.MPESA_CONSUMER_KEY &&
+    process.env.MPESA_CONSUMER_SECRET &&
+    process.env.MPESA_SHORTCODE &&
+    process.env.MPESA_PASSKEY
+  );
+}
+
+async function getDarajaAccessToken() {
+  if (!hasDarajaConfig()) {
+    return null;
+  }
+
+  const auth = Buffer.from(
+    `${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`
+  ).toString('base64');
+
+  const response = await fetch(`${getDarajaBaseUrl()}/oauth/v1/generate?grant_type=client_credentials`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Basic ${auth}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Daraja auth failed: ${response.status} ${text}`);
+  }
+
+  const payload = await response.json();
+  return payload.access_token;
+}
+
+router.get('/', authRequired, async (req, res, next) => {
+  try {
+    const { tutorId } = req.query;
+    const userId = Number(req.user.sub);
+    const sql = tutorId
+      ? 'SELECT * FROM payments WHERE tutor_id = $1 AND tutor_id = $2 ORDER BY created_at DESC'
+      : 'SELECT * FROM payments WHERE tutor_id = $1 ORDER BY created_at DESC';
+    const params = tutorId ? [Number(tutorId), userId] : [userId];
+    const result = await query(sql, params);
+    res.json(result.rows);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/mpesa/initiate', authRequired, async (req, res, next) => {
+  try {
+    const {
+      amount,
+      phoneNumber,
+      purpose = 'annual_fee',
+      bookingId = null,
+    } = req.body;
+
+    if (!amount || !phoneNumber) {
+      return res.status(400).json({ message: 'Amount and phone number are required.' });
+    }
+
+    const tutorId = Number(req.user.sub);
+    const normalizedAmount = Number(amount);
+    const transactionReference = `${(process.env.MPESA_TRANSACTION_PREFIX || 'SHULE').toUpperCase()}-${Date.now()}`;
+    const paymentStatus = hasDarajaConfig() ? 'INITIATED' : 'READY_FOR_PRODUCTION';
+
+    const paymentResult = await query(
+      `INSERT INTO payments (
+        tutor_id,
+        booking_id,
+        phone_number,
+        amount,
+        currency,
+        status,
+        provider,
+        purpose,
+        merchant_request_id,
+        checkout_request_id,
+        transaction_reference,
+        response_code,
+        response_description,
+        created_at,
+        updated_at
+      ) VALUES ($1, $2, $3, $4, 'KES', $5, 'MPESA', $6, NULL, NULL, $7, NULL, $8, NOW(), NOW())
+      RETURNING *`,
+      [
+        tutorId,
+        bookingId ? Number(bookingId) : null,
+        phoneNumber,
+        normalizedAmount,
+        paymentStatus,
+        purpose,
+        transactionReference,
+        hasDarajaConfig() ? 'STK push queued for Daraja.' : 'Daraja config missing. Ready for deployment replacement.',
+      ]
+    );
+
+    if (!hasDarajaConfig()) {
+      return res.status(202).json({
+        message: 'M-Pesa STK push is not activated in this environment yet. Add the production Daraja keys to MPESA_* env vars before deployment.',
+        payment: paymentResult.rows[0],
+        productionReady: false,
+      });
+    }
+
+    const accessToken = await getDarajaAccessToken();
+    const timestamp = new Date().toISOString().replace(/[-:T.]/g, '').slice(0, 14);
+    const password = Buffer.from(
+      `${process.env.MPESA_SHORTCODE}${process.env.MPESA_PASSKEY}${timestamp}`,
+      'utf8'
+    ).toString('base64');
+
+    const response = await fetch(`${getDarajaBaseUrl()}/mpesa/stkpush/v1/processrequest`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        BusinessShortCode: process.env.MPESA_SHORTCODE,
+        Password: password,
+        Timestamp: timestamp,
+        TransactionType: 'CustomerPayBillOnline',
+        Amount: normalizedAmount,
+        PartyA: phoneNumber.replace(/\D/g, ''),
+        PartyB: process.env.MPESA_SHORTCODE,
+        PhoneNumber: phoneNumber.replace(/\D/g, ''),
+        CallBackURL: process.env.MPESA_CALLBACK_URL || 'https://example.com/mpesa/callback',
+        AccountReference: purpose,
+        TransactionDesc: `Shule AI Plus ${purpose}`,
+      }),
+    });
+
+    const darajaPayload = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(darajaPayload.errorMessage || darajaPayload.message || 'Daraja STK push failed');
+    }
+
+    const merchantRequestId = darajaPayload.MerchantRequestID || null;
+    const checkoutRequestId = darajaPayload.CheckoutRequestID || null;
+
+    await query(
+      `UPDATE payments
+       SET status = 'INITIATED',
+           merchant_request_id = COALESCE($1, merchant_request_id),
+           checkout_request_id = COALESCE($2, checkout_request_id),
+           response_code = COALESCE($3, response_code),
+           response_description = COALESCE($4, response_description),
+           updated_at = NOW()
+       WHERE id = $5`,
+      [
+        merchantRequestId,
+        checkoutRequestId,
+        darajaPayload.ResponseCode != null ? String(darajaPayload.ResponseCode) : null,
+        darajaPayload.ResponseDescription || null,
+        paymentResult.rows[0].id,
+      ]
+    );
+
+    res.status(201).json({
+      message: 'M-Pesa STK push initiated successfully.',
+      payment: { ...paymentResult.rows[0], merchantRequestId, checkoutRequestId },
+      productionReady: true,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/mpesa/callback', async (req, res, next) => {
+  try {
+    const payload = req.body || {};
+    const resultCode = Number(payload.ResultCode ?? payload.resultCode ?? 0);
+    const resultDesc = payload.ResultDesc || payload.resultDesc || 'M-Pesa callback';
+    const callbackMetadata = payload.CallbackMetadata || payload.callbackMetadata || {};
+    const itemList = Array.isArray(callbackMetadata.Item) ? callbackMetadata.Item : [];
+    const receiptItem = itemList.find((item) => item.Name === 'MpesaReceiptNumber');
+    const transactionRefItem = itemList.find((item) => item.Name === 'TransactionDate');
+    const requestId = payload.MerchantRequestID || payload.merchantRequestID || null;
+    const checkoutRequestId = payload.CheckoutRequestID || payload.checkoutRequestID || null;
+    const phoneNumber = payload.PhoneNumber || payload.phoneNumber || null;
+    const amount = payload.Amount || payload.amount || null;
+
+    const paymentResult = await query(
+      `UPDATE payments
+       SET status = $1,
+           response_code = $2,
+           response_description = $3,
+           merchant_request_id = COALESCE($4, merchant_request_id),
+           checkout_request_id = COALESCE($5, checkout_request_id),
+           phone_number = COALESCE($6, phone_number),
+           amount = COALESCE(CAST($7 AS NUMERIC), amount),
+           mpesa_receipt_number = COALESCE($8, mpesa_receipt_number),
+           updated_at = NOW()
+       WHERE merchant_request_id = $4 OR checkout_request_id = $5
+       RETURNING *`,
+      [
+        resultCode === 0 ? 'PAID' : 'FAILED',
+        String(resultCode),
+        resultDesc,
+        requestId,
+        checkoutRequestId,
+        phoneNumber,
+        amount,
+        receiptItem ? receiptItem.Value : null,
+      ]
+    );
+
+    return res.json({
+      message: 'M-Pesa callback processed.',
+      updated: paymentResult.rowCount,
+      status: resultCode === 0 ? 'PAID' : 'FAILED',
+      transactionDate: transactionRefItem ? transactionRefItem.Value : null,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+module.exports = router;

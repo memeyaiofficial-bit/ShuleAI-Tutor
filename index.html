@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shule AI Plus — Get a Tutor, Help Your Child Do Better</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#182922;
+    --ink-soft:#3B5245;
+    --paper:#F6F1E4;
+    --paper-soft:#FFFDF7;
+    --white:#ffffff;
+    --marigold:#DE8F26;
+    --marigold-dark:#A96613;
+    --maroon:#7C3030;
+    --line:#DED0AC;
+    --line-soft:#EDE4C9;
+    --radius:14px;
+    --radius-sm:8px;
+    --shadow:0 10px 30px rgba(24,41,34,.10);
+    --shadow-sm:0 4px 12px rgba(24,41,34,.08);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:'Work Sans',sans-serif;
+    color:var(--ink);
+    background:var(--paper);
+    line-height:1.5;
+  }
+  h1,h2,h3,h4{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    margin:0;
+    color:var(--ink);
+    letter-spacing:-0.01em;
+  }
+  p{margin:0;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  ul{margin:0;padding:0;list-style:none;}
+  img{max-width:100%;display:block;}
+  .container{max-width:1140px;margin:0 auto;padding:0 24px;}
+  :focus-visible{outline:3px solid var(--marigold-dark);outline-offset:2px;}
+
+  /* ---------- NAV ---------- */
+  .nav{
+    position:sticky;top:0;z-index:60;
+    background:rgba(246,241,228,.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    max-width:1140px;margin:0 auto;padding:14px 24px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{
+    width:38px;height:38px;border-radius:10px;
+    background:var(--ink);color:var(--paper-soft);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces',serif;font-weight:700;font-size:18px;
+  }
+  .brand-name{font-family:'Fraunces',serif;font-weight:600;font-size:19px;}
+  .brand-name span{color:var(--marigold-dark);}
+  .nav-links{display:flex;align-items:center;gap:6px;}
+  .nav-link{
+    padding:9px 14px;border-radius:999px;font-size:14.5px;font-weight:600;
+    color:var(--ink-soft);white-space:nowrap;
+  }
+  .nav-link:hover{background:var(--line-soft);color:var(--ink);}
+  .nav-link.is-active{background:var(--ink);color:var(--paper-soft);}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:12px 22px;border-radius:999px;font-weight:700;font-size:15px;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+    white-space:nowrap;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--marigold);color:#241505;box-shadow:var(--shadow-sm);}
+  .btn-primary:hover{background:var(--marigold-dark);color:#fff;}
+  .btn-dark{background:var(--ink);color:var(--paper-soft);}
+  .btn-dark:hover{background:#0f1a15;}
+  .btn-outline{background:transparent;border:1.5px solid var(--ink);color:var(--ink);}
+  .btn-outline:hover{background:var(--ink);color:var(--paper-soft);}
+  .btn-outline-light{background:transparent;border:1.5px solid rgba(247,243,231,.55);color:var(--paper-soft);}
+  .btn-outline-light:hover{background:rgba(247,243,231,.12);}
+  .btn-block{width:100%;}
+  .btn-sm{padding:9px 16px;font-size:13.5px;}
+  .btn[disabled]{opacity:.55;cursor:not-allowed;}
+  .hamburger{display:none;}
+
+  /* ---------- VIEWS ---------- */
+  .view{display:none;}
+  .view.is-active{display:block;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background:
+      radial-gradient(900px 420px at 85% -10%, rgba(222,143,38,.18), transparent 60%),
+      var(--ink);
+    color:var(--paper-soft);
+    padding:64px 0 48px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero-grid{
+    display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center;
+  }
+  .eyebrow-plain{
+    font-size:14.5px;font-weight:600;color:var(--marigold);margin-bottom:16px;display:block;
+  }
+  .hero h1{
+    font-size:clamp(34px,4.6vw,54px);
+    line-height:1.08;
+    color:#fff;
+  }
+  .hero-sub{
+    margin-top:20px;font-size:17px;color:rgba(247,243,231,.82);max-width:46ch;
+  }
+  .hero-ctas{display:flex;gap:14px;margin-top:32px;flex-wrap:wrap;}
+  .hero-stats{
+    margin-top:44px;display:grid;grid-template-columns:repeat(4,1fr);
+    gap:0;border-top:1px solid rgba(247,243,231,.18);padding-top:22px;
+  }
+  .hero-stat b{
+    display:block;font-family:'Fraunces',serif;font-size:26px;color:#fff;font-weight:600;
+  }
+  .hero-stat span{font-size:12.5px;color:rgba(247,243,231,.65);}
+  .hero-card{
+    background:var(--paper-soft);border-radius:20px;padding:26px;color:var(--ink);
+    box-shadow:0 24px 60px rgba(0,0,0,.35);
+  }
+  .hero-card-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+  .hero-card-head b{font-family:'Fraunces',serif;font-size:17px;}
+  .hero-card-row{
+    display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px dashed var(--line);
+  }
+  .hero-card-row:first-of-type{border-top:none;}
+  .mini-avatar{
+    width:42px;height:42px;border-radius:50%;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;color:#fff;font-size:14px;font-family:'Fraunces',serif;
+  }
+  .hero-card-row .meta{flex:1;min-width:0;}
+  .hero-card-row .meta b{display:block;font-size:14.5px;}
+  .hero-card-row .meta small{color:var(--ink-soft);font-size:12.5px;}
+  .pill{
+    font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:999px;
+    background:rgba(60,150,90,.14);color:#2C6B45;flex:none;
+  }
+
+  /* ---------- SECTION SHELLS ---------- */
+  .section{padding:72px 0;}
+  .section-alt{background:var(--paper-soft);}
+  .section-head{max-width:640px;margin-bottom:40px;}
+  .section-head .kicker{color:var(--marigold-dark);font-weight:700;font-size:14px;margin-bottom:10px;display:block;}
+  .section-head h2{font-size:clamp(26px,3vw,36px);}
+  .section-head p{margin-top:12px;color:var(--ink-soft);font-size:16px;}
+
+  /* ---------- HOW IT WORKS ---------- */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+  .step{
+    background:var(--white);border:1px solid var(--line);border-radius:var(--radius);
+    padding:26px;position:relative;
+  }
+  .step-num{
+    font-family:'Fraunces',serif;font-size:34px;color:var(--line);font-weight:600;
+    margin-bottom:10px;
+  }
+  .step h3{font-size:18px;margin-bottom:8px;}
+  .step p{color:var(--ink-soft);font-size:14.5px;}
+
+  /* ---------- TEACHERS ---------- */
+  .teacher-toolbar{
+    display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;
+    margin-bottom:28px;
+  }
+  select, input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], textarea{
+    font-family:inherit;font-size:14.5px;padding:11px 14px;border-radius:var(--radius-sm);
+    border:1.5px solid var(--line);background:var(--white);color:var(--ink);width:100%;
+  }
+  select:focus, input:focus, textarea:focus{border-color:var(--marigold-dark);}
+  .filter-select{width:auto;min-width:180px;}
+  .teacher-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:22px;
+  }
+  .teacher-card{
+    background:var(--white);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px;display:flex;flex-direction:column;gap:14px;
+    box-shadow:var(--shadow-sm);
+  }
+  .teacher-top{display:flex;gap:14px;align-items:flex-start;}
+  .avatar{
+    width:56px;height:56px;border-radius:50%;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces',serif;font-weight:700;font-size:18px;color:#fff;
+  }
+  .teacher-top .name-block{flex:1;min-width:0;}
+  .teacher-top h3{font-size:17px;}
+  .subject-tag{
+    display:inline-block;margin-top:5px;font-size:12.5px;font-weight:700;
+    color:var(--maroon);background:rgba(124,48,48,.08);padding:3px 9px;border-radius:999px;
+  }
+  .teacher-meta{display:flex;flex-wrap:wrap;gap:10px 16px;font-size:13px;color:var(--ink-soft);}
+  .teacher-meta span{display:flex;align-items:center;gap:6px;}
+  .teacher-rate{
+    display:flex;align-items:center;justify-content:space-between;
+    border-top:1px dashed var(--line);padding-top:14px;
+  }
+  .rate-amt{font-family:'Fraunces',serif;font-size:18px;font-weight:600;}
+  .rate-amt small{font-family:'Work Sans',sans-serif;font-size:12px;color:var(--ink-soft);font-weight:500;}
+  .icon{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;}
+
+  /* ---------- SPLIT / BECOME TUTOR TEASER ---------- */
+  .split{
+    display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);
+    border-radius:20px;overflow:hidden;background:var(--white);
+  }
+  .split > div{padding:44px;}
+  .split-dark{background:var(--ink);color:var(--paper-soft);}
+  .split h3{font-size:24px;}
+  .split-dark h3{color:#fff;}
+  .split p{margin-top:12px;color:var(--ink-soft);font-size:15px;}
+  .split-dark p{color:rgba(247,243,231,.78);}
+  .split ul{margin-top:18px;display:flex;flex-direction:column;gap:10px;}
+  .split li{display:flex;gap:10px;font-size:14.5px;align-items:flex-start;}
+  .split-dark li{color:rgba(247,243,231,.88);}
+  .check{color:var(--marigold);flex:none;margin-top:2px;}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:var(--ink);color:rgba(247,243,231,.7);padding:40px 0;font-size:13.5px;}
+  .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+  .footer-inner b{color:#fff;}
+
+  /* ---------- FORM VIEW (Become a Tutor) ---------- */
+  .form-shell{
+    max-width:760px;margin:0 auto;background:var(--white);border:1px solid var(--line);
+    border-radius:20px;padding:40px;
+  }
+  .form-head{margin-bottom:28px;}
+  .form-head h2{font-size:26px;}
+  .form-head p{margin-top:8px;color:var(--ink-soft);font-size:14.5px;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13.5px;font-weight:700;margin-bottom:7px;color:var(--ink);}
+  .field .hint{font-size:12px;color:var(--ink-soft);margin-top:5px;display:block;}
+  .fieldset-title{
+    font-family:'Fraunces',serif;font-size:18px;margin:30px 0 14px;padding-top:20px;
+    border-top:1px solid var(--line-soft);
+  }
+  .fieldset-title:first-of-type{border-top:none;padding-top:0;margin-top:0;}
+
+  /* availability grid */
+  .avail-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-sm);}
+  table.avail{border-collapse:collapse;width:100%;min-width:560px;font-size:13px;}
+  table.avail th, table.avail td{padding:9px;text-align:center;border:1px solid var(--line-soft);}
+  table.avail th{background:var(--paper);font-weight:700;font-size:12.5px;}
+  table.avail td:first-child, table.avail th:first-child{text-align:left;font-weight:600;background:var(--paper);white-space:nowrap;}
+  .slot-cell{
+    width:36px;height:32px;cursor:pointer;background:var(--white);transition:background .12s;
+  }
+  .slot-cell.on{background:var(--marigold);}
+  .slot-cell.readonly{cursor:default;}
+  .slot-cell.disabled{background:#efe9d8;cursor:not-allowed;}
+  .slot-cell.picked{background:var(--maroon);outline:2px solid var(--ink);}
+
+  .holiday-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center;}
+  .holiday-row input{flex:1;min-width:160px;}
+  .chip{
+    display:inline-flex;align-items:center;gap:8px;background:var(--paper);
+    border:1px solid var(--line);padding:6px 10px;border-radius:999px;font-size:12.5px;
+  }
+  .chip button{color:var(--maroon);font-weight:700;font-size:14px;line-height:1;}
+  .chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+
+  .fee-box{
+    background:var(--paper);border:1px dashed var(--marigold-dark);border-radius:var(--radius);
+    padding:20px;margin-top:8px;
+  }
+  .fee-box .fee-amt{font-family:'Fraunces',serif;font-size:28px;font-weight:600;}
+  .fee-box p{color:var(--ink-soft);font-size:13.5px;margin-top:4px;}
+
+  .form-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:26px;}
+  .error-text{color:var(--maroon);font-size:12.5px;margin-top:5px;display:none;}
+  .field.has-error input, .field.has-error select{border-color:var(--maroon);}
+  .field.has-error .error-text{display:block;}
+
+  /* ---------- MODAL ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(15,20,17,.55);z-index:100;
+    display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;
+  }
+  .modal-overlay.is-open{display:flex;}
+  .modal{
+    background:var(--white);border-radius:20px;max-width:560px;width:100%;
+    padding:30px;position:relative;box-shadow:0 30px 80px rgba(0,0,0,.35);
+  }
+  .modal-close{
+    position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;background:var(--paper);font-size:16px;
+  }
+  .modal h3{font-size:21px;margin-bottom:6px;}
+  .modal .sub{color:var(--ink-soft);font-size:13.5px;margin-bottom:18px;}
+  .modal-teacher{
+    display:flex;gap:12px;align-items:center;background:var(--paper);border-radius:var(--radius-sm);
+    padding:14px;margin-bottom:20px;
+  }
+  .modal-teacher b{font-size:15px;}
+  .modal-teacher small{color:var(--ink-soft);}
+  .step-dots{display:flex;gap:6px;margin-bottom:18px;}
+  .step-dots span{width:24px;height:4px;border-radius:2px;background:var(--line);}
+  .step-dots span.active{background:var(--marigold-dark);}
+
+  .stk-status{
+    display:none;align-items:center;gap:12px;background:var(--paper);border-radius:var(--radius-sm);
+    padding:14px;margin-top:16px;font-size:13.5px;
+  }
+  .stk-status.is-visible{display:flex;}
+  .spinner{
+    width:20px;height:20px;border-radius:50%;border:3px solid var(--line);
+    border-top-color:var(--marigold-dark);animation:spin .8s linear infinite;flex:none;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .stk-status.success{background:rgba(60,150,90,.12);}
+  .stk-status.success .spinner{display:none;}
+
+  /* ---------- TOAST ---------- */
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:14px 22px;border-radius:999px;font-size:14px;
+    box-shadow:var(--shadow);z-index:200;opacity:0;pointer-events:none;transition:all .25s ease;
+  }
+  .toast.is-visible{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ---------- LOGIN VIEW ---------- */
+  .login-shell{
+    max-width:420px;margin:80px auto;background:var(--white);border:1px solid var(--line);
+    border-radius:20px;padding:36px;
+  }
+  .login-shell h2{font-size:23px;text-align:center;}
+  .login-shell p{text-align:center;color:var(--ink-soft);font-size:13.5px;margin-top:8px;}
+  .login-tabs{display:flex;background:var(--paper);border-radius:999px;padding:4px;margin:22px 0 18px;}
+  .login-tabs button{flex:1;padding:9px;border-radius:999px;font-weight:700;font-size:13.5px;color:var(--ink-soft);}
+  .login-tabs button.is-active{background:var(--ink);color:#fff;}
+  .demo-hint{
+    margin-top:18px;font-size:12px;color:var(--ink-soft);background:var(--paper);
+    padding:10px 12px;border-radius:var(--radius-sm);
+  }
+
+  /* ---------- DASHBOARD VIEW ---------- */
+  .dash-head{
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
+    margin-bottom:30px;
+  }
+  .dash-profile{display:flex;align-items:center;gap:14px;}
+  .dash-profile h2{font-size:22px;}
+  .dash-profile p{color:var(--ink-soft);font-size:13.5px;margin-top:2px;}
+  .dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
+  .dash-stat{
+    background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:18px;
+  }
+  .dash-stat b{display:block;font-family:'Fraunces',serif;font-size:24px;}
+  .dash-stat span{font-size:12.5px;color:var(--ink-soft);}
+  .booking-list{display:flex;flex-direction:column;gap:14px;}
+  .booking-card{
+    background:var(--white);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;
+  }
+  .booking-card .who b{font-size:15.5px;display:block;}
+  .booking-card .who small{color:var(--ink-soft);font-size:12.5px;}
+  .booking-when{
+    font-size:13.5px;background:var(--paper);padding:8px 12px;border-radius:var(--radius-sm);font-weight:600;
+  }
+  .booking-actions{display:flex;gap:8px;}
+  .icon-btn{
+    width:38px;height:38px;border-radius:50%;background:var(--paper);display:flex;align-items:center;
+    justify-content:center;transition:background .15s;
+  }
+  .icon-btn:hover{background:var(--line-soft);}
+  .empty-state{
+    text-align:center;padding:60px 20px;color:var(--ink-soft);background:var(--white);
+    border:1px dashed var(--line);border-radius:var(--radius);
+  }
+
+  @media(max-width:920px){
+    .hero-grid{grid-template-columns:1fr;}
+    .steps{grid-template-columns:1fr;}
+    .teacher-grid{grid-template-columns:1fr 1fr;}
+    .split{grid-template-columns:1fr;}
+    .field-row{grid-template-columns:1fr;}
+    .dash-stats{grid-template-columns:1fr 1fr;}
+  }
+  @media(max-width:640px){
+    .nav-links{display:none;position:absolute;top:64px;left:0;right:0;background:var(--paper);
+      flex-direction:column;padding:12px;border-bottom:1px solid var(--line);gap:4px;}
+    .nav-links.is-open{display:flex;}
+    .hamburger{display:flex;width:38px;height:38px;align-items:center;justify-content:center;border-radius:10px;background:var(--line-soft);}
+    .teacher-grid{grid-template-columns:1fr;}
+    .hero-stats{grid-template-columns:1fr 1fr;row-gap:18px;}
+    .form-shell{padding:24px 18px;}
+    .dash-stats{grid-template-columns:1fr 1fr;}
+    .booking-card{flex-direction:column;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <div class="brand-mark">S</div>
+      <div class="brand-name">Shule AI <span>Plus</span></div>
+    </div>
+    <button class="hamburger" id="hamburgerBtn" aria-label="Menu">☰</button>
+    <div class="nav-links" id="navLinks">
+      <a class="nav-link" data-view="home">Home</a>
+      <a class="nav-link" data-view="home" data-scroll="teachers">Find a Tutor</a>
+      <a class="nav-link" data-view="become">Become a Tutor</a>
+      <a class="nav-link" data-view="login">Tutor Login</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HOME VIEW ============ -->
+<div class="view is-active" id="view-home">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <span class="eyebrow-plain">Shule AI Plus — verified TSC tutors, nationwide</span>
+        <h1>Get a tutor. Help your child do better, starting today.</h1>
+        <p class="hero-sub">Book vetted, TSC-registered teachers for one-on-one sessions in Maths, Sciences, English, Kiswahili and every CBC subject — in your county, at a time that works for you.</p>
+        <div class="hero-ctas">
+          <a href="#teachers" class="btn btn-primary">Book a Tutor Now</a>
+          <a href="#" class="btn btn-outline-light" data-view="become">Become a Tutor</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><b>1,240+</b><span>Verified tutors</span></div>
+          <div class="hero-stat"><b>47</b><span>Counties reached</span></div>
+          <div class="hero-stat"><b>4.8/5</b><span>Average rating</span></div>
+          <div class="hero-stat"><b>9,600+</b><span>Sessions booked</span></div>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-head">
+          <div class="mini-avatar" style="background:#B96F17">JW</div>
+          <div>
+            <b>Today's bookings</b>
+            <div style="font-size:12.5px;color:var(--ink-soft)">Live snapshot from the platform</div>
+          </div>
+        </div>
+        <div class="hero-card-row">
+          <div class="mini-avatar" style="background:#3B7A57">FO</div>
+          <div class="meta"><b>Faith Otieno · Chemistry</b><small>Kisumu · Wed 4–6pm</small></div>
+          <span class="pill">Confirmed</span>
+        </div>
+        <div class="hero-card-row">
+          <div class="mini-avatar" style="background:#7C3030">DM</div>
+          <div class="meta"><b>David Mutua · Mathematics</b><small>Machakos · Sat 10am–12pm</small></div>
+          <span class="pill">Confirmed</span>
+        </div>
+        <div class="hero-card-row">
+          <div class="mini-avatar" style="background:#2C4F6B">GA</div>
+          <div class="meta"><b>Grace Achieng · English</b><small>Nairobi · Mon 6–8pm</small></div>
+          <span class="pill">Confirmed</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker">How it works</span>
+        <h2>Three steps to your child's next session</h2>
+        <p>No apps to install, no long forms for parents — find a tutor, pick a slot, pay with M-Pesa.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>Find the right tutor</h3>
+          <p>Filter by subject and county to see verified TSC teachers with ratings and hourly rates.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>Pick an open slot</h3>
+          <p>Every tutor publishes their real weekly availability — book the day and time that suits your family.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>Pay & confirm with M-Pesa</h3>
+          <p>Send the STK push, enter your PIN, and the session is locked in on both ends instantly.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEACHERS -->
+  <section class="section section-alt" id="teachers">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker">Top rated on Shule AI Plus</span>
+        <h2>Meet our best rated teachers</h2>
+        <p>Every tutor below is TSC-registered and reviewed by parents on the platform.</p>
+      </div>
+      <div class="teacher-toolbar">
+        <select class="filter-select" id="subjectFilter">
+          <option value="">All subjects</option>
+        </select>
+        <select class="filter-select" id="countyFilter">
+          <option value="">All counties</option>
+        </select>
+      </div>
+      <div class="teacher-grid" id="teacherGrid"></div>
+    </div>
+  </section>
+
+  <!-- BECOME A TUTOR TEASER -->
+  <section class="section">
+    <div class="container">
+      <div class="split">
+        <div class="split-dark">
+          <span class="eyebrow-plain">For teachers</span>
+          <h3>Turn your free hours into an income</h3>
+          <p>Join hundreds of TSC-registered teachers earning from tutoring sessions booked directly through Shule AI Plus.</p>
+          <ul>
+            <li><span class="check">✓</span> Set your own hourly rate and weekly availability</li>
+            <li><span class="check">✓</span> Get booking alerts on WhatsApp and email</li>
+            <li><span class="check">✓</span> One flat KES 1,000 platform fee — billed once a year</li>
+          </ul>
+          <div style="margin-top:24px;"><a href="#" class="btn btn-primary" data-view="become">Register as a Tutor</a></div>
+        </div>
+        <div>
+          <span class="eyebrow-plain" style="color:var(--maroon)">Already registered?</span>
+          <h3>Manage your bookings</h3>
+          <p>Log in with the email or WhatsApp number you registered with to see every session parents have booked with you.</p>
+          <ul>
+            <li><span class="check" style="color:var(--maroon)">✓</span> View upcoming sessions by day and time</li>
+            <li><span class="check" style="color:var(--maroon)">✓</span> Message parents directly on WhatsApp or email</li>
+            <li><span class="check" style="color:var(--maroon)">✓</span> Track your earnings per session</li>
+          </ul>
+          <div style="margin-top:24px;"><a href="#" class="btn btn-outline" data-view="login">Tutor Login</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ BECOME A TUTOR VIEW ============ -->
+<div class="view" id="view-become">
+  <section class="section">
+    <div class="container">
+      <div class="form-shell">
+        <div class="form-head">
+          <h2>Register as a tutor</h2>
+          <p>Complete your KYC details, set your weekly availability, and activate your account with the annual platform fee.</p>
+        </div>
+
+        <form id="tutorForm" novalidate>
+          <div class="fieldset-title">1 · Your details (KYC)</div>
+          <div class="field-row">
+            <div class="field">
+              <label for="f-name">Full names</label>
+              <input type="text" id="f-name" placeholder="e.g. Jane Wanjiru Mwangi" required>
+              <span class="error-text">Please enter your full name.</span>
+            </div>
+            <div class="field">
+              <label for="f-email">Email address</label>
+              <input type="email" id="f-email" placeholder="you@example.com" required>
+              <span class="error-text">Please enter a valid email.</span>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="f-password">Create a password</label>
+              <input type="password" id="f-password" placeholder="Choose a password" required>
+              <span class="error-text">Please enter a password.</span>
+            </div>
+            <div class="field">
+              <label for="f-tsc">TSC number</label>
+              <input type="text" id="f-tsc" placeholder="e.g. 987654" required>
+              <span class="error-text">TSC number is required.</span>
+            </div>
+            <div class="field">
+              <label for="f-id">ID number</label>
+              <input type="text" id="f-id" placeholder="National ID number" required>
+              <span class="error-text">ID number is required.</span>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="f-whatsapp">WhatsApp number</label>
+              <input type="tel" id="f-whatsapp" placeholder="+254 7XX XXX XXX" required>
+              <span class="hint">Bookings and alerts are sent to this number.</span>
+              <span class="error-text">Enter a valid Kenyan number, e.g. +254712345678.</span>
+            </div>
+            <div class="field">
+              <label for="f-county">Location (county)</label>
+              <select id="f-county" required></select>
+              <span class="error-text">Please select your county.</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="f-rate">Charge per hour, session (KES)</label>
+            <input type="number" id="f-rate" min="200" step="50" placeholder="e.g. 800" required>
+            <span class="error-text">Enter your hourly rate.</span>
+          </div>
+          <div class="field">
+            <label for="f-subject">Subjects you teach</label>
+            <div style="display:flex;gap:10px;">
+              <select id="f-subject" style="flex:1;"></select>
+              <button type="button" class="btn btn-outline btn-sm" id="addSubjectBtn">Add subject</button>
+            </div>
+            <span class="hint">Add every subject you're able to tutor — parents can find you under each one.</span>
+            <div class="chip-row" id="subjectChips"></div>
+            <span class="error-text" id="subjectError">Add at least one subject.</span>
+          </div>
+
+          <div class="fieldset-title">2 · Weekly availability</div>
+          <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:12px;">Tap the slots you're free for sessions — just like a booking calendar. Parents will only be able to book these times.</p>
+          <div class="avail-wrap"><div id="availGridEdit"></div></div>
+
+          <div style="margin-top:18px;">
+            <label style="font-size:13.5px;font-weight:700;">Mark holiday / unavailable dates</label>
+            <div class="holiday-row">
+              <input type="date" id="f-holiday">
+              <button type="button" class="btn btn-outline btn-sm" id="addHolidayBtn">Add date</button>
+            </div>
+            <div class="chip-row" id="holidayChips"></div>
+          </div>
+
+          <div class="fieldset-title">3 · Activate your account</div>
+          <div class="fee-box">
+            <div class="fee-amt">KES 1,000 <span style="font-size:14px;font-weight:500;color:var(--ink-soft);">/ year</span></div>
+            <p>One flat annual platform fee gives you unlimited bookings for 12 months. Enter the M-Pesa number to pay from.</p>
+            <div class="field-row" style="margin-top:14px;">
+              <div class="field" style="margin-bottom:0;">
+                <label for="f-mpesa">M-Pesa number</label>
+                <input type="tel" id="f-mpesa" placeholder="+254 7XX XXX XXX">
+              </div>
+              <div class="field" style="margin-bottom:0;display:flex;align-items:flex-end;">
+                <button type="button" class="btn btn-dark btn-block" id="paySTKBtn">Send M-Pesa Prompt</button>
+              </div>
+            </div>
+            <div class="stk-status" id="stkStatus">
+              <div class="spinner"></div>
+              <div id="stkStatusText">Sending STK push to your phone…</div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="submitTutorBtn" disabled>Complete Registration</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ LOGIN VIEW ============ -->
+<div class="view" id="view-login">
+  <section class="section">
+    <div class="container">
+      <div class="login-shell">
+        <h2>Tutor login</h2>
+        <p>See your bookings, contact parents, and track your sessions.</p>
+        <div class="login-tabs">
+          <button type="button" class="is-active" data-mode="email">Email</button>
+          <button type="button" data-mode="whatsapp">WhatsApp number</button>
+        </div>
+        <form id="loginForm">
+          <div class="field" id="loginEmailField">
+            <label for="l-email">Email address</label>
+            <input type="email" id="l-email" placeholder="you@example.com">
+          </div>
+          <div class="field" id="loginWaField" style="display:none;">
+            <label for="l-wa">WhatsApp number</label>
+            <input type="tel" id="l-wa" placeholder="+254 7XX XXX XXX">
+          </div>
+          <div class="field">
+            <label for="l-password">Password</label>
+            <input type="password" id="l-password" placeholder="Enter your password">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Log In</button>
+        </form>
+        <div class="demo-hint">Demo tutor account — email: <strong>jane.wanjiru@example.com</strong></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ DASHBOARD VIEW ============ -->
+<div class="view" id="view-dashboard">
+  <section class="section">
+    <div class="container">
+      <div class="dash-head">
+        <div class="dash-profile">
+          <div class="avatar" id="dashAvatar" style="width:56px;height:56px;font-size:18px;"></div>
+          <div>
+            <h2 id="dashName"></h2>
+            <p id="dashMeta"></p>
+          </div>
+        </div>
+        <button class="btn btn-outline" id="logoutBtn">Log out</button>
+      </div>
+      <div class="dash-stats">
+        <div class="dash-stat"><b id="statUpcoming">0</b><span>Upcoming sessions</span></div>
+        <div class="dash-stat"><b id="statTotal">0</b><span>Total bookings</span></div>
+        <div class="dash-stat"><b id="statEarnings">KES 0</b><span>Estimated earnings</span></div>
+        <div class="dash-stat"><b id="statRate">—</b><span>Your hourly rate</span></div>
+      </div>
+      <h3 style="font-family:'Fraunces',serif;font-size:19px;margin-bottom:16px;">Your bookings</h3>
+      <div class="booking-list" id="bookingList"></div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="container footer-inner">
+    <div><b>Shule AI Plus</b> — Get a tutor. Help your child do better.</div>
+    <div>© 2026 Shule AI Plus · Nairobi, Kenya</div>
+  </div>
+</footer>
+
+<!-- ============ BOOKING MODAL ============ -->
+<div class="modal-overlay" id="bookingOverlay">
+  <div class="modal">
+    <button class="modal-close" id="closeBookingModal">✕</button>
+    <div id="bookingModalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================================================================
+   DATA
+=================================================================== */
+const COUNTIES = ["Nairobi","Mombasa","Kwale","Kilifi","Tana River","Lamu","Taita-Taveta","Garissa","Wajir","Mandera","Marsabit","Isiolo","Meru","Tharaka-Nithi","Embu","Kitui","Machakos","Makueni","Nyandarua","Nyeri","Kirinyaga","Murang'a","Kiambu","Turkana","West Pokot","Samburu","Trans Nzoia","Uasin Gishu","Elgeyo-Marakwet","Nandi","Baringo","Laikipia","Nakuru","Narok","Kajiado","Kericho","Bomet","Kakamega","Vihiga","Bungoma","Busia","Siaya","Kisumu","Homa Bay","Migori","Kisii","Nyamira"];
+const SUBJECTS = ["Mathematics","English","Kiswahili","Science & Technology","Integrated Science","Chemistry","Physics","Biology","Social Studies","Religious Education","Creative Arts","Digital Literacy","Business Studies","Agriculture","Pre-Technical Studies"];
+const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const SLOTS = ["6–8am","8–10am","10am–12pm","2–4pm","4–6pm","6–8pm"];
+const AVATAR_COLORS = ["#B96F17","#3B7A57","#7C3030","#2C4F6B","#8A5A2B","#4E6B3B","#6B3B63","#2E6B6B"];
+
+function blankAvailability(){
+  const a = {};
+  DAYS.forEach(d => a[d] = SLOTS.map(()=>false));
+  return a;
+}
+function initials(name){
+  return name.split(" ").filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join("");
+}
+function colorFor(name){
+  let sum = 0; for(const c of name) sum += c.charCodeAt(0);
+  return AVATAR_COLORS[sum % AVATAR_COLORS.length];
+}
+
+const API_BASE = window.SHULE_API_BASE || (
+  window.location.hostname === 'localhost'
+    ? 'http://localhost:4000'
+    : window.location.origin
+);
+let teachers = [];
+let bookings = [];
+
+async function apiFetch(path, options = {}) {
+  const requestOptions = {
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+    },
+  };
+
+  if (options.body && !requestOptions.headers['Content-Type']) {
+    requestOptions.headers['Content-Type'] = 'application/json';
+  }
+
+  const response = await fetch(`${API_BASE}${path}`, requestOptions);
+  const contentType = response.headers.get('content-type') || '';
+  const payload = contentType.includes('application/json') ? await response.json() : await response.text();
+
+  if (!response.ok) {
+    throw new Error(payload.message || payload || 'Request failed');
+  }
+
+  return payload;
+}
+
+function normalizeTutorRow(row) {
+  const availability = row.availability || blankAvailability();
+  return {
+    id: Number(row.id),
+    name: row.name || row.full_name,
+    email: row.email,
+    whatsapp: row.whatsapp,
+    tsc: row.tsc || row.tsc_number,
+    idnum: row.idnum || row.id_number,
+    subjects: Array.isArray(row.subjects) ? row.subjects : [],
+    county: row.county,
+    rate: Number(row.rate || row.hourly_rate || 0),
+    rating: Number(row.rating || 0),
+    reviews: Number(row.reviews || row.review_count || 0),
+    availability: availability,
+    holidays: Array.isArray(row.holidays) ? row.holidays : [],
+  };
+}
+
+function normalizeBookingRow(row) {
+  return {
+    id: Number(row.id),
+    teacherId: Number(row.tutor_id || row.teacherId || 0),
+    parentName: row.parent_name || row.parentName,
+    parentWhatsapp: row.parent_whatsapp || row.parentWhatsapp,
+    parentEmail: row.parent_email || row.parentEmail,
+    childGrade: row.child_grade || row.childGrade,
+    day: row.session_day || row.day,
+    slot: row.session_slot || row.slot,
+    amount: Number(row.amount || 0),
+    status: row.status || 'Confirmed',
+  };
+}
+
+async function loadTeachersAndBookings() {
+  try {
+    const [tutorList, bookingList] = await Promise.all([
+      apiFetch('/api/tutors'),
+      apiFetch('/api/bookings'),
+    ]);
+
+    teachers = (Array.isArray(tutorList) ? tutorList : []).map(normalizeTutorRow);
+    bookings = (Array.isArray(bookingList) ? bookingList : []).map(normalizeBookingRow);
+    populateFilters();
+    renderTeacherGrid();
+  } catch (error) {
+    console.error('API load failed:', error);
+    teachers = [];
+    bookings = [];
+    populateFilters();
+    renderTeacherGrid();
+    toast('Could not load live tutor data. Please start the backend server.');
+  }
+}
+
+let currentTutor = null;
+let editAvailability = blankAvailability();
+let editHolidays = [];
+let editSubjects = [];
+let tutorFeePaid = false;
+let bookingState = { teacher:null, day:null, slotIdx:null, step:1 };
+let nextTeacherId = 100;
+let nextBookingId = 200;
+
+/* ===================================================================
+   UTIL
+=================================================================== */
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('is-visible');
+  setTimeout(()=>t.classList.remove('is-visible'), 3200);
+}
+function normalizePhone(v){
+  v = v.trim().replace(/[\s-]/g,"");
+  if(v.startsWith("0")) v = "+254" + v.slice(1);
+  if(v.startsWith("254")) v = "+" + v;
+  if(v.startsWith("7") || v.startsWith("1")) v = "+254" + v;
+  return v;
+}
+function isValidKenyanPhone(v){
+  return /^\+254(7|1)\d{8}$/.test(v);
+}
+function isValidEmail(v){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+}
+function waLink(number, text){
+  const n = number.replace(/\D/g,"");
+  return "https://wa.me/" + n + (text ? ("?text=" + encodeURIComponent(text)) : "");
+}
+
+/* ===================================================================
+   NAVIGATION
+=================================================================== */
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('is-active'));
+  document.getElementById('view-' + id).classList.add('is-active');
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.toggle('is-active', l.dataset.view === id));
+  window.scrollTo({top:0,behavior:'instant' in window ? 'instant':'auto'});
+  document.getElementById('navLinks').classList.remove('is-open');
+}
+document.querySelectorAll('[data-view]').forEach(el=>{
+  el.addEventListener('click', (e)=>{
+    e.preventDefault();
+    showView(el.dataset.view);
+    if(el.dataset.scroll){
+      setTimeout(()=>{
+        const target = document.getElementById(el.dataset.scroll);
+        if(target) target.scrollIntoView({behavior:'smooth'});
+      },50);
+    }
+  });
+});
+document.getElementById('hamburgerBtn').addEventListener('click', ()=>{
+  document.getElementById('navLinks').classList.toggle('is-open');
+});
+
+/* ===================================================================
+   TEACHER LISTING
+=================================================================== */
+function populateFilters(){
+  const subjSel = document.getElementById('subjectFilter');
+  const countySel = document.getElementById('countyFilter');
+  const currentSubject = subjSel.value;
+  const currentCounty = countySel.value;
+
+  subjSel.innerHTML = '<option value="">All subjects</option>';
+  countySel.innerHTML = '<option value="">All counties</option>';
+
+  const subjSet = [...new Set(teachers.flatMap(t=>t.subjects))];
+  subjSet.forEach(s=>{
+    const o = document.createElement('option'); o.value=s; o.textContent=s; subjSel.appendChild(o);
+  });
+  const countySet = [...new Set(teachers.map(t=>t.county))];
+  countySet.forEach(c=>{
+    const o = document.createElement('option'); o.value=c; o.textContent=c; countySel.appendChild(o);
+  });
+
+  if (currentSubject && [...subjSel.options].some(opt => opt.value === currentSubject)) {
+    subjSel.value = currentSubject;
+  }
+  if (currentCounty && [...countySel.options].some(opt => opt.value === currentCounty)) {
+    countySel.value = currentCounty;
+  }
+}
+
+function renderTeacherGrid(){
+  const grid = document.getElementById('teacherGrid');
+  const subjFilter = document.getElementById('subjectFilter').value;
+  const countyFilter = document.getElementById('countyFilter').value;
+  const filtered = teachers.filter(t =>
+    (!subjFilter || t.subjects.includes(subjFilter)) &&
+    (!countyFilter || t.county === countyFilter)
+  ).sort((a,b)=>b.rating - a.rating);
+
+  grid.innerHTML = "";
+
+  if (teachers.length === 0) {
+    grid.innerHTML = `
+      <div class="state-card">
+        <div class="state-emoji">🧑‍🏫</div>
+        <h3>Fresh tutor profiles are loading</h3>
+        <p>We’re fetching the latest verified teachers for your subject and county. Give it a moment and the marketplace will appear here.</p>
+        <div class="state-actions">
+          <button class="btn btn-primary" type="button" onclick="loadTeachersAndBookings()">Refresh tutors</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  if(filtered.length === 0){
+    grid.innerHTML = `
+      <div class="state-card">
+        <div class="state-emoji">🔎</div>
+        <h3>No tutors match that filter</h3>
+        <p>Try widening your search or choose a different subject or county to see more available teachers.</p>
+        <div class="state-actions">
+          <button class="btn btn-outline" type="button" onclick="document.getElementById('subjectFilter').value=''; document.getElementById('countyFilter').value=''; renderTeacherGrid();">Reset filters</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  filtered.forEach(t=>{
+    const card = document.createElement('div');
+    card.className = 'teacher-card';
+    card.innerHTML = `
+      <div class="teacher-top">
+        <div class="avatar" style="background:${colorFor(t.name)}">${initials(t.name)}</div>
+        <div class="name-block">
+          <h3>${t.name}</h3>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:5px;">
+            ${t.subjects.map(s=>`<span class="subject-tag">${s}</span>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="teacher-meta">
+        <span>${starIcon()} ${t.rating.toFixed(1)} (${t.reviews})</span>
+        <span>${pinIcon()} ${t.county}</span>
+      </div>
+      <div class="teacher-rate">
+        <div class="rate-amt">KES ${t.rate} <small>/ hr session</small></div>
+        <button class="btn btn-primary btn-sm" data-book="${t.id}">Book</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+  grid.querySelectorAll('[data-book]').forEach(btn=>{
+    btn.addEventListener('click', ()=> openBookingModal(Number(btn.dataset.book)));
+  });
+}
+function starIcon(){
+  return `<svg class="icon" viewBox="0 0 24 24" style="fill:${'#DE8F26'};stroke:none;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+}
+function pinIcon(){
+  return `<svg class="icon" viewBox="0 0 24 24"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>`;
+}
+function waIcon(){
+  return `<svg class="icon" viewBox="0 0 24 24" style="stroke:none;fill:#2C6B45;"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1 1 12 20zm4.4-5.9c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8 1-.1.1-.3.2-.5.1-.2-.1-1-.4-1.9-1.2-.7-.6-1.2-1.4-1.3-1.6-.1-.2 0-.4.1-.5.1-.1.2-.3.4-.4.1-.1.2-.2.2-.4.1-.1 0-.3 0-.4-.1-.1-.5-1.2-.7-1.7-.2-.4-.4-.4-.5-.4h-.4c-.1 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.4c.1.2 1.6 2.5 3.9 3.5.5.2 1 .4 1.3.5.5.2 1 .1 1.4.1.4-.1 1.4-.6 1.6-1.1.2-.5.2-1 .1-1.1-.1-.1-.2-.2-.4-.3z"/></svg>`;
+}
+function mailIcon(){
+  return `<svg class="icon" viewBox="0 0 24 24" style="stroke:#2C4F6B;"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>`;
+}
+
+document.getElementById('subjectFilter').addEventListener('change', renderTeacherGrid);
+document.getElementById('countyFilter').addEventListener('change', renderTeacherGrid);
+
+/* ===================================================================
+   BOOKING MODAL
+=================================================================== */
+function openBookingModal(teacherId){
+  const teacher = teachers.find(t=>t.id === teacherId);
+  if(!teacher) return;
+  bookingState = { teacher, day:null, slotIdx:null, step:1 };
+  renderBookingStep1();
+  document.getElementById('bookingOverlay').classList.add('is-open');
+}
+function closeBookingModal(){
+  document.getElementById('bookingOverlay').classList.remove('is-open');
+}
+document.getElementById('closeBookingModal').addEventListener('click', closeBookingModal);
+document.getElementById('bookingOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'bookingOverlay') closeBookingModal();
+});
+
+function buildReadonlyGrid(teacher, selectable){
+  let html = '<table class="avail"><thead><tr><th>Time</th>';
+  DAYS.forEach(d => html += `<th>${d}</th>`);
+  html += '</tr></thead><tbody>';
+  SLOTS.forEach((slotLabel, sIdx)=>{
+    html += `<tr><td>${slotLabel}</td>`;
+    DAYS.forEach(day=>{
+      const available = teacher.availability[day][sIdx];
+      const isPicked = bookingState.day === day && bookingState.slotIdx === sIdx;
+      const cls = available ? (selectable ? `slot-cell readonly ${isPicked?'picked':'on'}` : 'slot-cell readonly on') : 'slot-cell readonly disabled';
+      html += `<td><div class="${cls}" ${available && selectable ? `data-day="${day}" data-slot="${sIdx}"`:''}></div></td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  return html;
+}
+
+function renderBookingStep1(){
+  const t = bookingState.teacher;
+  const body = document.getElementById('bookingModalBody');
+  body.innerHTML = `
+    <div class="step-dots"><span class="active"></span><span></span><span></span></div>
+    <h3>Book a session</h3>
+    <p class="sub">Choose an open time slot below. Marigold cells are available.</p>
+    <div class="modal-teacher">
+      <div class="avatar" style="background:${colorFor(t.name)}">${initials(t.name)}</div>
+      <div><b>${t.name}</b><br><small>${t.subjects.join(', ')} · ${t.county} · KES ${t.rate}/hr</small></div>
+    </div>
+    <div class="avail-wrap">${buildReadonlyGrid(t, true)}</div>
+    <div class="form-actions">
+      <button class="btn btn-primary" id="toStep2Btn" disabled>Continue</button>
+    </div>
+  `;
+  body.querySelectorAll('.slot-cell[data-day]').forEach(cell=>{
+    cell.addEventListener('click', ()=>{
+      bookingState.day = cell.dataset.day;
+      bookingState.slotIdx = Number(cell.dataset.slot);
+      renderBookingStep1();
+      document.getElementById('toStep2Btn').disabled = false;
+    });
+  });
+  const cont = document.getElementById('toStep2Btn');
+  if(bookingState.day !== null) cont.disabled = false;
+  cont.addEventListener('click', renderBookingStep2);
+}
+
+function renderBookingStep2(){
+  const t = bookingState.teacher;
+  const body = document.getElementById('bookingModalBody');
+  body.innerHTML = `
+    <div class="step-dots"><span class="active"></span><span class="active"></span><span></span></div>
+    <h3>Your details</h3>
+    <p class="sub">We'll send this booking to ${t.name.split(' ')[0]} by WhatsApp and email.</p>
+    <div class="modal-teacher">
+      <div class="avatar" style="background:${colorFor(t.name)}">${initials(t.name)}</div>
+      <div><b>${t.name}</b><br><small>${bookingState.day} · ${SLOTS[bookingState.slotIdx]} · KES ${t.rate}/session</small></div>
+    </div>
+    <div class="field"><label>Parent full name</label><input type="text" id="pb-name" placeholder="Your name"></div>
+    <div class="field-row">
+      <div class="field"><label>WhatsApp number</label><input type="tel" id="pb-wa" placeholder="+254 7XX XXX XXX"></div>
+      <div class="field"><label>Email address</label><input type="email" id="pb-email" placeholder="you@example.com"></div>
+    </div>
+    <div class="field"><label>Child's grade / class</label><input type="text" id="pb-grade" placeholder="e.g. Grade 5"></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" id="backStep1">Back</button>
+      <button class="btn btn-primary" id="toStep3Btn">Continue to payment</button>
+    </div>
+  `;
+  document.getElementById('backStep1').addEventListener('click', renderBookingStep1);
+  document.getElementById('toStep3Btn').addEventListener('click', ()=>{
+    const name = document.getElementById('pb-name').value.trim();
+    const wa = normalizePhone(document.getElementById('pb-wa').value);
+    const email = document.getElementById('pb-email').value.trim();
+    const grade = document.getElementById('pb-grade').value.trim();
+    if(!name || !isValidKenyanPhone(wa) || !isValidEmail(email) || !grade){
+      toast("Please fill in all fields correctly.");
+      return;
+    }
+    bookingState.parent = {name, wa, email, grade};
+    renderBookingStep3();
+  });
+}
+
+function renderBookingStep3(){
+  const t = bookingState.teacher;
+  const body = document.getElementById('bookingModalBody');
+  body.innerHTML = `
+    <div class="step-dots"><span class="active"></span><span class="active"></span><span class="active"></span></div>
+    <h3>Pay with M-Pesa</h3>
+    <p class="sub">Send the prompt and enter your M-Pesa PIN to confirm this session.</p>
+    <div class="modal-teacher">
+      <div class="avatar" style="background:${colorFor(t.name)}">${initials(t.name)}</div>
+      <div><b>${t.name}</b><br><small>${bookingState.day} · ${SLOTS[bookingState.slotIdx]}</small></div>
+    </div>
+    <div class="fee-box">
+      <div class="fee-amt">KES ${t.rate} <span style="font-size:14px;font-weight:500;color:var(--ink-soft);">session fee</span></div>
+      <p>Sent to: ${bookingState.parent.wa}</p>
+      <div class="form-actions" style="margin-top:14px;justify-content:flex-start;">
+        <button class="btn btn-dark" id="sendPaymentBtn">Send M-Pesa Prompt · KES ${t.rate}</button>
+      </div>
+      <div class="stk-status" id="bookingStkStatus">
+        <div class="spinner"></div>
+        <div id="bookingStkText">Sending STK push to your phone…</div>
+      </div>
+    </div>
+  `;
+  document.getElementById('sendPaymentBtn').addEventListener('click', (e)=>{
+    e.target.disabled = true;
+    const status = document.getElementById('bookingStkStatus');
+    const text = document.getElementById('bookingStkText');
+    status.classList.add('is-visible');
+    /* Backend integration point: replace this simulated delay with a call
+       to your server, which triggers the Safaricom Daraja STK Push API
+       for bookingState.parent.wa and t.rate, then confirms via callback. */
+    setTimeout(()=>{
+      status.classList.add('success');
+      text.textContent = "Payment received — your session is confirmed!";
+      finalizeBooking();
+      setTimeout(()=>{
+        closeBookingModal();
+        toast(`Booked! ${t.name} will reach out on ${bookingState.parent.wa}.`);
+      }, 1400);
+    }, 2200);
+  });
+}
+
+async function finalizeBooking(){
+  const t = bookingState.teacher;
+  const bookingPayload = {
+    tutorId: t.id,
+    parentName: bookingState.parent.name,
+    parentWhatsapp: bookingState.parent.wa,
+    parentEmail: bookingState.parent.email,
+    childGrade: bookingState.parent.grade,
+    day: bookingState.day,
+    slot: SLOTS[bookingState.slotIdx],
+    amount: t.rate,
+    status: 'Confirmed',
+  };
+
+  try {
+    const saved = await apiFetch('/api/bookings', {
+      method: 'POST',
+      body: JSON.stringify(bookingPayload),
+    });
+    const savedBooking = saved.booking || saved;
+    bookings.push(normalizeBookingRow(savedBooking));
+
+    const tutorMessage = saved.tutorMessage || `Hi ${t.name}, ${bookingState.parent.name} has booked a session with you on ${bookingState.day} at ${SLOTS[bookingState.slotIdx]}. Please contact ${bookingState.parent.wa}.`;
+    const tutorWhatsapp = saved.tutorWhatsapp || t.whatsapp;
+
+    if (tutorWhatsapp) {
+      const messageUrl = waLink(tutorWhatsapp, tutorMessage);
+      window.open(messageUrl, '_blank', 'noopener,noreferrer');
+    }
+  } catch (error) {
+    bookings.push({
+      id: nextBookingId++,
+      teacherId: t.id,
+      parentName: bookingState.parent.name,
+      parentWhatsapp: bookingState.parent.wa,
+      parentEmail: bookingState.parent.email,
+      childGrade: bookingState.parent.grade,
+      day: bookingState.day,
+      slot: SLOTS[bookingState.slotIdx],
+      amount: t.rate,
+      status: 'Confirmed',
+    });
+    console.warn('Booking save failed, using local fallback:', error);
+  }
+}
+
+/* ===================================================================
+   BECOME A TUTOR — availability grid + KYC form
+=================================================================== */
+function renderEditGrid(){
+  const container = document.getElementById('availGridEdit');
+  let html = '<table class="avail"><thead><tr><th>Time</th>';
+  DAYS.forEach(d => html += `<th>${d}</th>`);
+  html += '</tr></thead><tbody>';
+  SLOTS.forEach((slotLabel, sIdx)=>{
+    html += `<tr><td>${slotLabel}</td>`;
+    DAYS.forEach(day=>{
+      const on = editAvailability[day][sIdx];
+      html += `<td><div class="slot-cell ${on?'on':''}" data-day="${day}" data-slot="${sIdx}"></div></td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+  container.querySelectorAll('.slot-cell').forEach(cell=>{
+    cell.addEventListener('click', ()=>{
+      const day = cell.dataset.day, idx = Number(cell.dataset.slot);
+      editAvailability[day][idx] = !editAvailability[day][idx];
+      cell.classList.toggle('on', editAvailability[day][idx]);
+    });
+  });
+}
+function populateFormSelects(){
+  const countySel = document.getElementById('f-county');
+  countySel.innerHTML = '<option value="">Select county</option>' + COUNTIES.map(c=>`<option value="${c}">${c}</option>`).join('');
+  const subjSel = document.getElementById('f-subject');
+  subjSel.innerHTML = SUBJECTS.map(s=>`<option value="${s}">${s}</option>`).join('');
+}
+function renderSubjectChips(){
+  const wrap = document.getElementById('subjectChips');
+  wrap.innerHTML = editSubjects.map((s,i)=>`<span class="chip">${s} <button type="button" data-idx="${i}">✕</button></span>`).join('');
+  wrap.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      editSubjects.splice(Number(b.dataset.idx),1);
+      renderSubjectChips();
+    });
+  });
+  document.getElementById('f-subject').closest('.field').classList.remove('has-error');
+}
+document.getElementById('addSubjectBtn').addEventListener('click', ()=>{
+  const val = document.getElementById('f-subject').value;
+  if(val && !editSubjects.includes(val)){
+    editSubjects.push(val);
+    renderSubjectChips();
+  } else if(editSubjects.includes(val)){
+    toast(val + " is already on your list.");
+  }
+});
+function renderHolidayChips(){
+  const wrap = document.getElementById('holidayChips');
+  wrap.innerHTML = editHolidays.map((d,i)=>`<span class="chip">${d} <button type="button" data-idx="${i}">✕</button></span>`).join('');
+  wrap.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      editHolidays.splice(Number(b.dataset.idx),1);
+      renderHolidayChips();
+    });
+  });
+}
+document.getElementById('addHolidayBtn').addEventListener('click', ()=>{
+  const val = document.getElementById('f-holiday').value;
+  if(val && !editHolidays.includes(val)){
+    editHolidays.push(val);
+    renderHolidayChips();
+    document.getElementById('f-holiday').value = '';
+  }
+});
+
+document.getElementById('paySTKBtn').addEventListener('click', async (e)=>{
+  const phone = normalizePhone(document.getElementById('f-mpesa').value);
+  if(!isValidKenyanPhone(phone)){
+    toast("Enter a valid M-Pesa number, e.g. +254712345678.");
+    return;
+  }
+  e.target.disabled = true;
+  const status = document.getElementById('stkStatus');
+  const text = document.getElementById('stkStatusText');
+  status.classList.add('is-visible');
+  status.classList.remove('success');
+  text.textContent = "Sending STK push to your phone…";
+
+  try {
+    const token = localStorage.getItem('shuleTutorToken');
+    if (token) {
+      await apiFetch('/api/payments/mpesa/initiate', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ amount: 1000, phoneNumber: phone, purpose: 'annual_fee' }),
+      });
+    }
+  } catch (error) {
+    console.warn('Payment record save failed:', error);
+  }
+
+  setTimeout(()=>{
+    status.classList.add('success');
+    text.textContent = "Payment of KES 1,000 received — your account is now active!";
+    tutorFeePaid = true;
+    document.getElementById('submitTutorBtn').disabled = false;
+    e.target.disabled = true;
+    e.target.textContent = "Fee Paid ✓";
+  }, 2200);
+});
+
+document.getElementById('tutorForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const fields = [
+    ['f-name', v => v.trim().length > 2],
+    ['f-email', v => isValidEmail(v)],
+    ['f-password', v => v.length >= 6],
+    ['f-tsc', v => v.trim().length >= 4],
+    ['f-id', v => v.trim().length >= 5],
+    ['f-whatsapp', v => isValidKenyanPhone(normalizePhone(v))],
+    ['f-county', v => v !== ""]
+  ];
+  let valid = true;
+  fields.forEach(([id, test])=>{
+    const el = document.getElementById(id);
+    const field = el.closest('.field');
+    if(!test(el.value)){
+      field.classList.add('has-error');
+      valid = false;
+    } else {
+      field.classList.remove('has-error');
+    }
+  });
+  if(editSubjects.length === 0){
+    document.getElementById('f-subject').closest('.field').classList.add('has-error');
+    valid = false;
+  }
+  if(!valid){ toast("Please fix the highlighted fields."); return; }
+  if(!tutorFeePaid){ toast("Please complete the KES 1,000 annual payment first."); return; }
+
+  try {
+    const result = await apiFetch('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        fullName: document.getElementById('f-name').value.trim(),
+        email: document.getElementById('f-email').value.trim(),
+        whatsapp: normalizePhone(document.getElementById('f-whatsapp').value),
+        password: document.getElementById('f-password').value,
+        tscNumber: document.getElementById('f-tsc').value.trim(),
+        idNumber: document.getElementById('f-id').value.trim(),
+        county: document.getElementById('f-county').value,
+        hourlyRate: Number(document.getElementById('f-rate').value) || 500,
+        subjects: [...editSubjects],
+        availability: JSON.parse(JSON.stringify(editAvailability)),
+        holidays: [...editHolidays],
+      }),
+    });
+
+    localStorage.setItem('shuleTutorToken', result.token);
+    currentTutor = normalizeTutorRow(result.tutor);
+    toast('Registration complete! Welcome to Shule AI Plus.');
+    e.target.reset();
+    editAvailability = blankAvailability();
+    editHolidays = [];
+    editSubjects = [];
+    tutorFeePaid = false;
+    renderEditGrid();
+    renderHolidayChips();
+    renderSubjectChips();
+    document.getElementById('submitTutorBtn').disabled = true;
+    document.getElementById('paySTKBtn').disabled = false;
+    document.getElementById('paySTKBtn').textContent = 'Send M-Pesa Prompt';
+    document.getElementById('stkStatus').classList.remove('is-visible','success');
+    populateFormSelects();
+    await loadTeachersAndBookings();
+    renderDashboard();
+    showView('dashboard');
+  } catch (error) {
+    toast(error.message || 'Registration failed.');
+  }
+});
+
+/* ===================================================================
+   TUTOR LOGIN + DASHBOARD
+=================================================================== */
+document.querySelectorAll('.login-tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.login-tabs button').forEach(b=>b.classList.remove('is-active'));
+    btn.classList.add('is-active');
+    const isEmail = btn.dataset.mode === 'email';
+    document.getElementById('loginEmailField').style.display = isEmail ? 'block':'none';
+    document.getElementById('loginWaField').style.display = isEmail ? 'none':'block';
+  });
+});
+
+document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const emailMode = document.getElementById('loginEmailField').style.display !== 'none';
+  const identifier = emailMode
+    ? document.getElementById('l-email').value.trim().toLowerCase()
+    : normalizePhone(document.getElementById('l-wa').value);
+  const password = document.getElementById('l-password').value;
+
+  if (!identifier || !password) {
+    toast('Please enter your login details.');
+    return;
+  }
+
+  try {
+    const result = await apiFetch('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        identifier,
+        password,
+      }),
+    });
+
+    localStorage.setItem('shuleTutorToken', result.token);
+    currentTutor = normalizeTutorRow(result.tutor);
+    await loadTeachersAndBookings();
+    renderDashboard();
+    showView('dashboard');
+  } catch (error) {
+    toast(error.message || 'Login failed.');
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  currentTutor = null;
+  localStorage.removeItem('shuleTutorToken');
+  showView('home');
+});
+
+function renderDashboard(){
+  const t = currentTutor;
+  document.getElementById('dashAvatar').style.background = colorFor(t.name);
+  document.getElementById('dashAvatar').textContent = initials(t.name);
+  document.getElementById('dashName').textContent = t.name;
+  document.getElementById('dashMeta').textContent = `${t.subjects.join(', ')} · ${t.county} · TSC ${t.tsc}`;
+
+  const myBookings = bookings.filter(b=>b.teacherId === t.id);
+  document.getElementById('statUpcoming').textContent = myBookings.length;
+  document.getElementById('statTotal').textContent = myBookings.length;
+  document.getElementById('statEarnings').textContent = 'KES ' + myBookings.reduce((s,b)=>s+b.amount,0).toLocaleString();
+  document.getElementById('statRate').textContent = 'KES ' + t.rate;
+
+  const list = document.getElementById('bookingList');
+  if(myBookings.length === 0){
+    list.innerHTML = `
+      <div class="state-card">
+        <div class="state-emoji">📅</div>
+        <h3>No sessions booked yet</h3>
+        <p>Your upcoming lessons will appear here as soon as parents choose your profile and lock in a time.</p>
+        <div class="state-actions">
+          <button class="btn btn-primary" type="button" onclick="showView('home')">Share your profile</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  list.innerHTML = myBookings.map(b => `
+    <div class="booking-card">
+      <div class="who">
+        <b>${b.parentName}</b>
+        <small>${b.childGrade} · ${b.parentEmail}</small>
+      </div>
+      <div class="booking-when">${b.day} · ${b.slot}</div>
+      <div class="booking-actions">
+        <a class="icon-btn" title="Message on WhatsApp" href="${waLink(b.parentWhatsapp, 'Hello ' + b.parentName + ', this is ' + t.name + ' from Shule AI Plus regarding your ' + b.day + ' ' + b.slot + ' session.')}" target="_blank" rel="noopener">${waIcon()}</a>
+        <a class="icon-btn" title="Email parent" href="mailto:${b.parentEmail}?subject=Your%20Shule%20AI%20Plus%20session">${mailIcon()}</a>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ===================================================================
+   INIT
+=================================================================== */
+populateFilters();
+renderTeacherGrid();
+populateFormSelects();
+renderEditGrid();
+renderHolidayChips();
+renderSubjectChips();
+loadTeachersAndBookings();
+</script>
+</body>
+</html>

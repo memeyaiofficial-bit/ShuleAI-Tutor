@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: shule-tutor-api
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: shule-tutor-db
+          property: connectionString
+      - key: MPESA_ENVIRONMENT
+        value: production
+      - key: MPESA_CONSUMER_KEY
+        value: replace_with_production_consumer_key
+      - key: MPESA_CONSUMER_SECRET
+        value: replace_with_production_consumer_secret
+      - key: MPESA_SHORTCODE
+        value: replace_with_business_shortcode
+      - key: MPESA_PASSKEY
+        value: replace_with_passkey
+      - key: MPESA_CALLBACK_URL
+        value: https://your-render-app.onrender.com/api/payments/mpesa/callback
+      - key: MPESA_TRANSACTION_PREFIX
+        value: SHULE
+
+databases:
+  - name: shule-tutor-db
+    databaseName: shule_tutor
+    user: postgres
+    plan: free

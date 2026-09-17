@@ -1,0 +1,70 @@
+2026-09-17 05:54:15.418 EAT [6348] LOG:  starting PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit
+2026-09-17 05:54:15.426 EAT [6348] LOG:  could not bind IPv6 address "::1": Permission denied
+2026-09-17 05:54:15.426 EAT [6348] LOG:  could not bind IPv4 address "127.0.0.1": Permission denied
+2026-09-17 05:54:15.426 EAT [6348] WARNING:  could not create listen socket for "localhost"
+2026-09-17 05:54:15.426 EAT [6348] FATAL:  could not create any TCP/IP sockets
+2026-09-17 05:54:15.428 EAT [6348] LOG:  database system is shut down
+2026-09-17 05:57:39.647 EAT [28632] LOG:  starting PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit
+2026-09-17 05:57:39.652 EAT [28632] LOG:  listening on IPv6 address "::1", port 6543
+2026-09-17 05:57:39.652 EAT [28632] LOG:  listening on IPv4 address "127.0.0.1", port 6543
+2026-09-17 05:57:39.706 EAT [12264] LOG:  database system was shut down at 2026-09-17 05:54:00 EAT
+2026-09-17 05:57:39.749 EAT [28632] LOG:  database system is ready to accept connections
+2026-09-17 05:57:41.912 EAT [29164] FATAL:  role "Anthony Designs" does not exist
+2026-09-17 06:02:39.708 EAT [29372] LOG:  checkpoint starting: time
+2026-09-17 06:04:27.887 EAT [29372] LOG:  checkpoint complete: wrote 991 buffers (6.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=108.030 s, sync=0.133 s, total=108.180 s; sync files=330, longest=0.005 s, average=0.001 s; distance=4733 kB, estimate=4733 kB; lsn=0/1A14768, redo lsn=0/1A139F0
+2026-09-17 06:14:08.360 EAT [22904] ERROR:  column "password_hash" of relation "tutors" does not exist at character 62
+2026-09-17 06:14:08.360 EAT [22904] STATEMENT:  INSERT INTO tutors (
+	  full_name,
+	  email,
+	  whatsapp,
+	  password_hash,
+	  tsc_number,
+	  id_number,
+	  county,
+	  hourly_rate,
+	  rating,
+	  review_count,
+	  is_active,
+	  annual_fee_paid,
+	  created_at,
+	  updated_at
+	) VALUES
+	  ('Jane Wanjiru', 'jane.wanjiru@example.com', '+254712345001', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '445210', '22013344', 'Nairobi', 900, 4.9, 132, TRUE, TRUE, NOW(), NOW()),
+	  ('David Mutua', 'david.mutua@example.com', '+254712345002', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '778102', '27551190', 'Machakos', 750, 4.8, 98, TRUE, TRUE, NOW(), NOW()),
+	  ('Faith Otieno', 'faith.otieno@example.com', '+254712345003', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '519873', '25889210', 'Kisumu', 650, 5.0, 76, TRUE, TRUE, NOW(), NOW()),
+	  ('Grace Achieng', 'grace.achieng@example.com', '+254712345004', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '602198', '29104477', 'Nairobi', 800, 4.7, 154, TRUE, TRUE, NOW(), NOW())
+	ON CONFLICT (email) DO NOTHING;
+2026-09-17 06:17:09.852 EAT [6792] ERROR:  column "id" does not exist at character 61
+2026-09-17 06:17:09.852 EAT [6792] DETAIL:  There is a column named "id" in table "tutor_subjects", but it cannot be referenced from this part of the query.
+2026-09-17 06:17:09.852 EAT [6792] STATEMENT:  INSERT INTO tutor_subjects (tutor_id, subject_name)
+	SELECT id, subject_name
+	FROM (
+	  VALUES
+	    (1, 'Mathematics'),
+	    (1, 'Physics'),
+	    (2, 'Chemistry'),
+	    (2, 'Biology'),
+	    (3, 'Kiswahili'),
+	    (4, 'English'),
+	    (4, 'Social Studies')
+	) AS v(tutor_id, subject_name)
+	ON CONFLICT DO NOTHING;
+2026-09-17 06:17:40.011 EAT [29372] LOG:  checkpoint starting: time
+2026-09-17 06:17:48.356 EAT [29372] LOG:  checkpoint complete: wrote 77 buffers (0.5%); 0 WAL file(s) added, 0 removed, 0 recycled; write=8.303 s, sync=0.022 s, total=8.347 s; sync files=60, longest=0.004 s, average=0.001 s; distance=217 kB, estimate=4282 kB; lsn=0/1A4A0C8, redo lsn=0/1A4A038
+2026-09-17 06:22:40.382 EAT [29372] LOG:  checkpoint starting: time
+2026-09-17 06:22:43.583 EAT [29372] LOG:  checkpoint complete: wrote 30 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=3.173 s, sync=0.012 s, total=3.203 s; sync files=23, longest=0.002 s, average=0.001 s; distance=7 kB, estimate=3854 kB; lsn=0/1A4C018, redo lsn=0/1A4BFA8
+2026-09-17 06:27:40.613 EAT [29372] LOG:  checkpoint starting: time
+2026-09-17 06:27:42.721 EAT [29372] LOG:  checkpoint complete: wrote 20 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=2.085 s, sync=0.007 s, total=2.110 s; sync files=20, longest=0.002 s, average=0.001 s; distance=7 kB, estimate=3469 kB; lsn=0/1A4DC28, redo lsn=0/1A4DBD0
+2026-09-17 06:32:40.738 EAT [29372] LOG:  checkpoint starting: time
+2026-09-17 06:32:43.290 EAT [29372] LOG:  checkpoint complete: wrote 24 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=2.527 s, sync=0.011 s, total=2.553 s; sync files=24, longest=0.002 s, average=0.001 s; distance=13 kB, estimate=3124 kB; lsn=0/1A51080, redo lsn=0/1A50FF0
+2026-09-17 06:37:40.310 EAT [29372] LOG:  checkpoint starting: time
+2026-09-17 06:37:42.214 EAT [29372] LOG:  checkpoint complete: wrote 18 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.883 s, sync=0.004 s, total=1.904 s; sync files=18, longest=0.001 s, average=0.001 s; distance=9 kB, estimate=2812 kB; lsn=0/1A53710, redo lsn=0/1A536B8
+2026-09-17 06:42:40.235 EAT [29372] LOG:  checkpoint starting: time
+2026-09-17 06:42:41.135 EAT [29372] LOG:  checkpoint complete: wrote 9 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.880 s, sync=0.008 s, total=0.902 s; sync files=9, longest=0.005 s, average=0.001 s; distance=4 kB, estimate=2531 kB; lsn=0/1A54930, redo lsn=0/1A548D8
+2026-09-17 06:47:40.139 EAT [29372] LOG:  checkpoint starting: time
+2026-09-17 06:47:40.243 EAT [28632] LOG:  server process (PID 7136) was terminated by exception 0xC000013A
+2026-09-17 06:47:40.243 EAT [28632] DETAIL:  Failed process was running: SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'tutors' ORDER BY ordinal_position; SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'payments' ORDER BY ordinal_position;
+2026-09-17 06:47:40.243 EAT [28632] HINT:  See C include file "ntstatus.h" for a description of the hexadecimal value.
+2026-09-17 06:47:40.243 EAT [28632] LOG:  terminating any other active server processes
+2026-09-17 06:47:40.272 EAT [28632] LOG:  received fast shutdown request
+^C
