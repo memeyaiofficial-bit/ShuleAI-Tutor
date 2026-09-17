@@ -254,16 +254,20 @@ router.post('/mpesa/initiate', authRequired, async (req, res, next) => {
 router.post('/mpesa/callback', async (req, res, next) => {
   try {
     const payload = req.body || {};
-    const resultCode = Number(payload.ResultCode ?? payload.resultCode ?? 0);
-    const resultDesc = payload.ResultDesc || payload.resultDesc || 'M-Pesa callback';
-    const callbackMetadata = payload.CallbackMetadata || payload.callbackMetadata || {};
+    const callback = payload?.Body?.stkCallback || payload?.stkCallback || payload || {};
+    const rawResultCode = callback.ResultCode ?? callback.resultCode;
+    const resultCode = rawResultCode === undefined || rawResultCode === null ? -1 : Number(rawResultCode);
+    const resultDesc = callback.ResultDesc || callback.resultDesc || 'M-Pesa callback';
+    const callbackMetadata = callback.CallbackMetadata || callback.callbackMetadata || {};
     const itemList = Array.isArray(callbackMetadata.Item) ? callbackMetadata.Item : [];
     const receiptItem = itemList.find((item) => item.Name === 'MpesaReceiptNumber');
     const transactionRefItem = itemList.find((item) => item.Name === 'TransactionDate');
-    const requestId = payload.MerchantRequestID || payload.merchantRequestID || null;
-    const checkoutRequestId = payload.CheckoutRequestID || payload.checkoutRequestID || null;
-    const phoneNumber = payload.PhoneNumber || payload.phoneNumber || null;
-    const amount = payload.Amount || payload.amount || null;
+    const amountItem = itemList.find((item) => item.Name === 'Amount');
+    const phoneItem = itemList.find((item) => item.Name === 'PhoneNumber');
+    const requestId = callback.MerchantRequestID || callback.merchantRequestID || payload.MerchantRequestID || payload.merchantRequestID || null;
+    const checkoutRequestId = callback.CheckoutRequestID || callback.checkoutRequestID || payload.CheckoutRequestID || payload.checkoutRequestID || null;
+    const phoneNumber = phoneItem ? String(phoneItem.Value) : (callback.PhoneNumber || callback.phoneNumber || payload.PhoneNumber || payload.phoneNumber || null);
+    const amount = amountItem ? Number(amountItem.Value) : (callback.Amount || callback.amount || payload.Amount || payload.amount || null);
     const cancelledCodes = ['1032', '1037', '1038', '1041'];
     const normalizedStatus = resultCode === 0 ? 'PAID' : cancelledCodes.includes(String(resultCode)) ? 'CANCELLED' : 'FAILED';
 
@@ -275,7 +279,7 @@ router.post('/mpesa/callback', async (req, res, next) => {
       phoneNumber,
       amount,
       normalizedStatus,
-      payload: Object.keys(payload).length ? payload : null,
+      callbackShape: callback,
     });
 
     const paymentResult = await query(
