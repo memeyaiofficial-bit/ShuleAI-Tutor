@@ -1185,18 +1185,12 @@ function renderBookingStep3(){
     const status = document.getElementById('bookingStkStatus');
     const text = document.getElementById('bookingStkText');
     status.classList.add('is-visible');
-    /* Backend integration point: replace this simulated delay with a call
-       to your server, which triggers the Safaricom Daraja STK Push API
-       for bookingState.parent.wa and t.rate, then confirms via callback. */
-    setTimeout(()=>{
-      status.classList.add('success');
-      text.textContent = "Payment received — your session is confirmed!";
-      finalizeBooking();
-      setTimeout(()=>{
-        closeBookingModal();
-        toast(`Booked! ${t.name} will reach out on ${bookingState.parent.wa}.`);
-      }, 1400);
-    }, 2200);
+    status.classList.remove('success');
+    text.textContent = 'Waiting for the M-Pesa confirmation on your phone…';
+    toast('The payment prompt has been sent. The booking stays pending until the real M-Pesa result is received.');
+    /* Do NOT auto-confirm the booking here.
+       A parent booking must only be finalized after a real Daraja callback or
+       confirmed backend payment status. */
   });
 }
 
