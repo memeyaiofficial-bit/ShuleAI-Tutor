@@ -1323,34 +1323,49 @@ document.getElementById('paySTKBtn').addEventListener('click', async (e)=>{
     toast("Enter a valid M-Pesa number, e.g. +254712345678.");
     return;
   }
-  e.target.disabled = true;
+
+  const button = e.target;
   const status = document.getElementById('stkStatus');
   const text = document.getElementById('stkStatusText');
+
+  button.disabled = true;
   status.classList.add('is-visible');
   status.classList.remove('success');
   text.textContent = "Sending STK push to your phone…";
 
   try {
     const token = localStorage.getItem('shuleTutorToken');
-    if (token) {
-      await apiFetch('/api/payments/mpesa/initiate', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ amount: 1000, phoneNumber: phone, purpose: 'annual_fee' }),
-      });
+    if (!token) {
+      throw new Error('Please log in before sending the M-Pesa prompt.');
     }
-  } catch (error) {
-    console.warn('Payment record save failed:', error);
-  }
 
-  setTimeout(()=>{
+    const result = await apiFetch('/api/payments/mpesa/initiate', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ amount: 1000, phoneNumber: phone, purpose: 'annual_fee' }),
+    });
+
+    if (result && result.productionReady === false) {
+      text.textContent = result.message || 'M-Pesa is not configured for this environment yet.';
+      button.disabled = false;
+      button.textContent = 'Send M-Pesa Prompt';
+      toast('M-Pesa is not active yet. Add the Daraja credentials in Render to enable live STK pushes.');
+      return;
+    }
+
+    text.textContent = 'STK push sent. Please complete the prompt on your phone and wait for confirmation.';
     status.classList.add('success');
-    text.textContent = "Payment of KES 1,000 received — your account is now active!";
-    tutorFeePaid = true;
-    document.getElementById('submitTutorBtn').disabled = false;
-    e.target.disabled = true;
-    e.target.textContent = "Fee Paid ✓";
-  }, 2200);
+    button.textContent = 'Prompt Sent ✓';
+    tutorFeePaid = false;
+    document.getElementById('submitTutorBtn').disabled = true;
+    toast('The payment prompt has been sent. We will only activate the tutor account after a successful M-Pesa confirmation.');
+  } catch (error) {
+    console.error('Payment initiation failed:', error);
+    text.textContent = error.message || 'M-Pesa prompt could not be sent.';
+    button.disabled = false;
+    button.textContent = 'Send M-Pesa Prompt';
+    toast(error.message || 'M-Pesa prompt could not be sent.');
+  }
 });
 
 document.getElementById('tutorForm').addEventListener('submit', async (e)=>{
