@@ -67,4 +67,18 @@
 2026-09-17 06:47:40.243 EAT [28632] HINT:  See C include file "ntstatus.h" for a description of the hexadecimal value.
 2026-09-17 06:47:40.243 EAT [28632] LOG:  terminating any other active server processes
 2026-09-17 06:47:40.272 EAT [28632] LOG:  received fast shutdown request
-^C
+^C2026-09-17 06:51:15.821 EAT [13664] LOG:  starting PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit
+2026-09-17 06:51:15.828 EAT [13664] LOG:  listening on IPv6 address "::1", port 6543
+2026-09-17 06:51:15.828 EAT [13664] LOG:  listening on IPv4 address "127.0.0.1", port 6543
+2026-09-17 06:51:15.885 EAT [28704] LOG:  database system was interrupted; last known up at 2026-09-17 06:42:41 EAT
+2026-09-17 06:51:21.689 EAT [28704] LOG:  could not open file "./logfile.log": sharing violation
+2026-09-17 06:51:21.689 EAT [28704] DETAIL:  Continuing to retry for 30 seconds.
+2026-09-17 06:51:21.689 EAT [28704] HINT:  You might have antivirus, backup, or similar software interfering with the database system.
+2026-09-17 06:51:48.855 EAT [28704] LOG:  syncing data directory (fsync), elapsed time: 32.97 s, current path: ./pg_commit_ts
+2026-09-17 06:51:48.896 EAT [28704] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-09-17 06:51:48.930 EAT [28704] LOG:  redo starts at 0/1A548D8
+2026-09-17 06:51:48.957 EAT [28704] LOG:  invalid record length at 0/1A55CF8: expected at least 24, got 0
+2026-09-17 06:51:48.957 EAT [28704] LOG:  redo done at 0/1A55CC0 system usage: CPU: user: 0.00 s, system: 0.01 s, elapsed: 0.03 s
+2026-09-17 06:51:48.974 EAT [6044] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-09-17 06:51:49.036 EAT [6044] LOG:  checkpoint complete: wrote 9 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.034 s, sync=0.007 s, total=0.065 s; sync files=8, longest=0.002 s, average=0.001 s; distance=5 kB, estimate=5 kB; lsn=0/1A55CF8, redo lsn=0/1A55CF8
+2026-09-17 06:51:49.131 EAT [13664] LOG:  database system is ready to accept connections
