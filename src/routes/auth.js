@@ -71,7 +71,7 @@ router.post('/register', async (req, res, next) => {
         annual_fee_paid,
         created_at,
         updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 5.0, 0, TRUE, TRUE, NOW(), NOW())
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 5.0, 0, FALSE, FALSE, NOW(), NOW())
       RETURNING *`,
       [fullName.trim(), normalizedEmail, normalizedWhatsapp, passwordHash, tscNumber || null, idNumber || null, county, Number(hourlyRate || 0)]
     );
@@ -115,6 +115,10 @@ router.post('/login', async (req, res, next) => {
 
     if (!valid) {
       return res.status(401).json({ message: 'Invalid login credentials.' });
+    }
+
+    if (!tutor.is_active) {
+      return res.status(403).json({ message: 'Account pending payment confirmation. Complete the M-Pesa verification to activate your tutor account.' });
     }
 
     const token = signTutor(tutor);

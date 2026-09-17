@@ -184,7 +184,7 @@ router.post('/', async (req, res, next) => {
         annual_fee_paid,
         created_at,
         updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, 5.0, 0, TRUE, TRUE, NOW(), NOW()) RETURNING *`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, 5.0, 0, FALSE, FALSE, NOW(), NOW()) RETURNING *`,
       [fullName, email, whatsapp, tscNumber || null, idNumber || null, county, Number(hourlyRate || 0)]
     );
 

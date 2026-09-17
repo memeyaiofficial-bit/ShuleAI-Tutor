@@ -59,6 +59,28 @@ router.get('/', authRequired, async (req, res, next) => {
   }
 });
 
+router.get('/status', authRequired, async (req, res, next) => {
+  try {
+    const tutorId = Number(req.user.sub);
+    const result = await query(
+      `SELECT * FROM payments WHERE tutor_id = $1 ORDER BY created_at DESC LIMIT 1`,
+      [tutorId]
+    );
+
+    const payment = result.rows[0] || null;
+    const isPaid = Boolean(payment && payment.status && payment.status.toUpperCase() === 'PAID');
+
+    res.json({
+      payment,
+      status: payment ? payment.status : 'PENDING',
+      isPaid,
+      annualFeePaid: isPaid,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.post('/mpesa/initiate', authRequired, async (req, res, next) => {
   try {
     const {
@@ -219,6 +241,20 @@ router.post('/mpesa/callback', async (req, res, next) => {
         receiptItem ? receiptItem.Value : null,
       ]
     );
+
+    if (resultCode === 0 && paymentResult.rows.length > 0) {
+      const payment = paymentResult.rows[0];
+      if (payment.tutor_id) {
+        await query(
+          `UPDATE tutors
+           SET annual_fee_paid = TRUE,
+               is_active = TRUE,
+               updated_at = NOW()
+           WHERE id = $1`,
+          [payment.tutor_id]
+        );
+      }
+    }
 
     return res.json({
       message: 'M-Pesa callback processed.',

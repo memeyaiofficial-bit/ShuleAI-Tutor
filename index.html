@@ -1327,18 +1327,19 @@ document.getElementById('paySTKBtn').addEventListener('click', async (e)=>{
   const button = e.target;
   const status = document.getElementById('stkStatus');
   const text = document.getElementById('stkStatusText');
+  const token = localStorage.getItem('shuleTutorToken');
+
+  if (!token) {
+    toast('Please log in before sending the M-Pesa prompt.');
+    return;
+  }
 
   button.disabled = true;
   status.classList.add('is-visible');
   status.classList.remove('success');
-  text.textContent = "Sending STK push to your phone…";
+  text.textContent = 'Sending STK push to your phone…';
 
   try {
-    const token = localStorage.getItem('shuleTutorToken');
-    if (!token) {
-      throw new Error('Please log in before sending the M-Pesa prompt.');
-    }
-
     const result = await apiFetch('/api/payments/mpesa/initiate', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
@@ -1353,12 +1354,44 @@ document.getElementById('paySTKBtn').addEventListener('click', async (e)=>{
       return;
     }
 
-    text.textContent = 'STK push sent. Please complete the prompt on your phone and wait for confirmation.';
-    status.classList.add('success');
-    button.textContent = 'Prompt Sent ✓';
+    text.textContent = 'STK push sent. Waiting for the M-Pesa confirmation callback…';
+    button.textContent = 'Waiting for confirmation…';
     tutorFeePaid = false;
     document.getElementById('submitTutorBtn').disabled = true;
-    toast('The payment prompt has been sent. We will only activate the tutor account after a successful M-Pesa confirmation.');
+
+    const pollForPayment = async () => {
+      try {
+        const paymentStatus = await apiFetch('/api/payments/status', {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (paymentStatus && paymentStatus.isPaid) {
+          tutorFeePaid = true;
+          status.classList.add('success');
+          text.textContent = 'Payment confirmed — your account is now active.';
+          document.getElementById('submitTutorBtn').disabled = false;
+          button.disabled = false;
+          button.textContent = 'Fee Paid ✓';
+          return;
+        }
+
+        if (paymentStatus && paymentStatus.status === 'FAILED') {
+          text.textContent = 'The M-Pesa payment was not successful. Please try again.';
+          button.disabled = false;
+          button.textContent = 'Send M-Pesa Prompt';
+          return;
+        }
+
+        setTimeout(pollForPayment, 3000);
+      } catch (error) {
+        console.warn('Payment status poll failed:', error);
+        setTimeout(pollForPayment, 3000);
+      }
+    };
+
+    pollForPayment();
+    toast('The payment prompt has been sent. Your account will activate after the real M-Pesa callback succeeds.');
   } catch (error) {
     console.error('Payment initiation failed:', error);
     text.textContent = error.message || 'M-Pesa prompt could not be sent.';
