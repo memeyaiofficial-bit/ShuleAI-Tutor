@@ -1418,6 +1418,7 @@ document.getElementById('paySTKBtn').addEventListener('click', async (e)=>{
     tutorFeePaid = false;
     document.getElementById('submitTutorBtn').disabled = true;
 
+    let pollCount = 0;
     const pollForPayment = async () => {
       try {
         const paymentStatus = await apiFetch('/api/payments/status', {
@@ -1435,16 +1436,43 @@ document.getElementById('paySTKBtn').addEventListener('click', async (e)=>{
           return;
         }
 
-        if (paymentStatus && paymentStatus.status === 'FAILED') {
-          text.textContent = 'The M-Pesa payment was not successful. Please try again.';
+        if (paymentStatus && (paymentStatus.isCancelled || paymentStatus.isFailed || paymentStatus.status === 'FAILED' || paymentStatus.status === 'CANCELLED')) {
+          text.textContent = 'The M-Pesa payment was cancelled or was not successful. Please try again.';
           button.disabled = false;
           button.textContent = 'Send M-Pesa Prompt';
+          tutorFeePaid = false;
+          document.getElementById('submitTutorBtn').disabled = true;
+          localStorage.removeItem('shuleTutorToken');
+          currentTutor = null;
+          return;
+        }
+
+        pollCount += 1;
+        if (pollCount >= 30) {
+          text.textContent = 'We are still waiting for the M-Pesa callback. If you cancelled the prompt, the payment was not accepted.';
+          button.disabled = false;
+          button.textContent = 'Send M-Pesa Prompt';
+          tutorFeePaid = false;
+          document.getElementById('submitTutorBtn').disabled = true;
+          localStorage.removeItem('shuleTutorToken');
+          currentTutor = null;
           return;
         }
 
         setTimeout(pollForPayment, 3000);
       } catch (error) {
         console.warn('Payment status poll failed:', error);
+        pollCount += 1;
+        if (pollCount >= 30) {
+          text.textContent = 'No M-Pesa confirmation received yet. If the prompt was cancelled, the payment was not approved.';
+          button.disabled = false;
+          button.textContent = 'Send M-Pesa Prompt';
+          tutorFeePaid = false;
+          document.getElementById('submitTutorBtn').disabled = true;
+          localStorage.removeItem('shuleTutorToken');
+          currentTutor = null;
+          return;
+        }
         setTimeout(pollForPayment, 3000);
       }
     };

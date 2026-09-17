@@ -68,12 +68,31 @@ router.get('/status', authRequired, async (req, res, next) => {
     );
 
     const payment = result.rows[0] || null;
-    const isPaid = Boolean(payment && payment.status && payment.status.toUpperCase() === 'PAID');
+    const normalizedStatus = payment ? String(payment.status || '').toUpperCase() : 'PENDING';
+    const responseCode = payment && payment.response_code ? String(payment.response_code) : null;
+    const cancelledCodes = ['1032', '1037', '1038', '1041'];
+    const isCancelled = normalizedStatus === 'CANCELLED' || cancelledCodes.includes(responseCode);
+    const isPaid = normalizedStatus === 'PAID' || responseCode === '0';
+    const isFailed = normalizedStatus === 'FAILED' || (!isPaid && !isCancelled && responseCode && responseCode !== '0');
+
+    if ((isCancelled || isFailed) && payment && payment.tutor_id) {
+      const deleted = await query(
+        `DELETE FROM tutors
+         WHERE id = $1 AND is_active = FALSE AND annual_fee_paid = FALSE
+         RETURNING id`,
+        [payment.tutor_id]
+      );
+      payment.deletedPendingTutor = deleted.rows.length > 0;
+    }
 
     res.json({
       payment,
       status: payment ? payment.status : 'PENDING',
+      normalizedStatus,
+      responseCode,
       isPaid,
+      isCancelled,
+      isFailed,
       annualFeePaid: isPaid,
     });
   } catch (error) {
@@ -216,6 +235,8 @@ router.post('/mpesa/callback', async (req, res, next) => {
     const checkoutRequestId = payload.CheckoutRequestID || payload.checkoutRequestID || null;
     const phoneNumber = payload.PhoneNumber || payload.phoneNumber || null;
     const amount = payload.Amount || payload.amount || null;
+    const cancelledCodes = ['1032', '1037', '1038', '1041'];
+    const normalizedStatus = resultCode === 0 ? 'PAID' : cancelledCodes.includes(String(resultCode)) ? 'CANCELLED' : 'FAILED';
 
     const paymentResult = await query(
       `UPDATE payments
@@ -231,7 +252,7 @@ router.post('/mpesa/callback', async (req, res, next) => {
        WHERE merchant_request_id = $4 OR checkout_request_id = $5
        RETURNING *`,
       [
-        resultCode === 0 ? 'PAID' : 'FAILED',
+        normalizedStatus,
         String(resultCode),
         resultDesc,
         requestId,
@@ -242,24 +263,33 @@ router.post('/mpesa/callback', async (req, res, next) => {
       ]
     );
 
-    if (resultCode === 0 && paymentResult.rows.length > 0) {
+    if (paymentResult.rows.length > 0) {
       const payment = paymentResult.rows[0];
       if (payment.tutor_id) {
-        await query(
-          `UPDATE tutors
-           SET annual_fee_paid = TRUE,
-               is_active = TRUE,
-               updated_at = NOW()
-           WHERE id = $1`,
-          [payment.tutor_id]
-        );
+        if (resultCode === 0) {
+          await query(
+            `UPDATE tutors
+             SET annual_fee_paid = TRUE,
+                 is_active = TRUE,
+                 updated_at = NOW()
+             WHERE id = $1`,
+            [payment.tutor_id]
+          );
+        } else {
+          await query(
+            `DELETE FROM tutors
+             WHERE id = $1 AND is_active = FALSE AND annual_fee_paid = FALSE
+             RETURNING id`,
+            [payment.tutor_id]
+          );
+        }
       }
     }
 
     return res.json({
       message: 'M-Pesa callback processed.',
       updated: paymentResult.rowCount,
-      status: resultCode === 0 ? 'PAID' : 'FAILED',
+      status: normalizedStatus,
       transactionDate: transactionRefItem ? transactionRefItem.Value : null,
     });
   } catch (error) {

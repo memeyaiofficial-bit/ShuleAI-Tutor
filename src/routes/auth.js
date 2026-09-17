@@ -35,6 +35,8 @@ router.post('/register', async (req, res, next) => {
       county,
       hourlyRate,
       subjects = [],
+      availability = {},
+      holidays = [],
     } = req.body;
 
     if (!fullName || !email || !whatsapp || !password || !county) {
@@ -84,6 +86,43 @@ router.post('/register', async (req, res, next) => {
       const placeholders = subjectParams.map((_, idx) => `($${idx * 2 + 1}, $${idx * 2 + 2})`).join(', ');
       const values = subjectParams.flat();
       await query(`INSERT INTO tutor_subjects (tutor_id, subject_name) VALUES ${placeholders}`, values);
+    }
+
+    if (availability && typeof availability === 'object') {
+      const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const slotLabels = ['6–8am', '8–10am', '10am–12pm', '2–4pm', '4–6pm', '6–8pm'];
+      const availabilityEntries = [];
+
+      Object.entries(availability).forEach(([day, slots]) => {
+        const dayIndex = dayNames.indexOf(day);
+        if (dayIndex === -1 || !Array.isArray(slots)) return;
+
+        slots.forEach((isAvailable, index) => {
+          if (isAvailable) {
+            availabilityEntries.push([result.rows[0].id, dayIndex, slotLabels[index], true]);
+          }
+        });
+      });
+
+      if (availabilityEntries.length > 0) {
+        const params = [];
+        const placeholders = availabilityEntries.map((entry, index) => {
+          const base = index * 4;
+          params.push(entry[0], entry[1], entry[2], entry[3]);
+          return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4})`;
+        }).join(', ');
+
+        await query(
+          `INSERT INTO tutor_availability (tutor_id, day_of_week, slot_label, is_available) VALUES ${placeholders}`,
+          params
+        );
+      }
+    }
+
+    if (Array.isArray(holidays) && holidays.length > 0) {
+      const holidayValues = holidays.flatMap((date) => [result.rows[0].id, date]);
+      const placeholders = holidays.map((_, idx) => `($${idx * 2 + 1}, $${idx * 2 + 2})`).join(', ');
+      await query(`INSERT INTO tutor_holidays (tutor_id, holiday_date) VALUES ${placeholders}`, holidayValues);
     }
 
     res.status(201).json({ message: 'Tutor registered successfully.', token, tutor });

@@ -49,6 +49,7 @@ router.get('/', async (req, res, next) => {
       LEFT JOIN tutor_subjects ts ON ts.tutor_id = t.id
       LEFT JOIN tutor_availability ta ON ta.tutor_id = t.id
       LEFT JOIN tutor_holidays th ON th.tutor_id = t.id
+      WHERE t.is_active = TRUE
       GROUP BY t.id
       ORDER BY t.rating DESC NULLS LAST, t.id ASC
     `);
@@ -110,7 +111,7 @@ router.get('/:id', async (req, res, next) => {
       LEFT JOIN tutor_subjects ts ON ts.tutor_id = t.id
       LEFT JOIN tutor_availability ta ON ta.tutor_id = t.id
       LEFT JOIN tutor_holidays th ON th.tutor_id = t.id
-      WHERE t.id = $1
+      WHERE t.id = $1 AND t.is_active = TRUE
       GROUP BY t.id
     `, [id]);
 
