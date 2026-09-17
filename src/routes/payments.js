@@ -72,8 +72,8 @@ router.get('/status', authRequired, async (req, res, next) => {
     const responseCode = payment && payment.response_code ? String(payment.response_code) : null;
     const cancelledCodes = ['1032', '1037', '1038', '1041'];
     const isCancelled = normalizedStatus === 'CANCELLED' || cancelledCodes.includes(responseCode);
-    const isPaid = normalizedStatus === 'PAID' || responseCode === '0';
-    const isFailed = normalizedStatus === 'FAILED' || (!isPaid && !isCancelled && responseCode && responseCode !== '0');
+    const isPaid = normalizedStatus === 'PAID';
+    const isFailed = normalizedStatus === 'FAILED' || (!isPaid && !isCancelled && responseCode && responseCode !== '0' && responseCode !== '200');
 
     if ((isCancelled || isFailed) && payment && payment.tutor_id) {
       const deleted = await query(
