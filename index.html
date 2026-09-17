@@ -1430,7 +1430,7 @@ document.getElementById('paySTKBtn').addEventListener('click', async (e)=>{
           return;
         }
 
-        if (paymentStatus && (paymentStatus.isCancelled || paymentStatus.isFailed || paymentStatus.status === 'FAILED' || paymentStatus.status === 'CANCELLED')) {
+        if (paymentStatus && (paymentStatus.isCancelled || paymentStatus.isFailed || paymentStatus.normalizedStatus === 'FAILED' || paymentStatus.normalizedStatus === 'CANCELLED')) {
           text.textContent = 'The M-Pesa payment was cancelled or was not successful. Please try again.';
           button.disabled = false;
           button.textContent = 'Send M-Pesa Prompt';
