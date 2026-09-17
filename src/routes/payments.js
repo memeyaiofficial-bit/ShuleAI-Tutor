@@ -88,13 +88,16 @@ router.get('/status', authRequired, async (req, res, next) => {
     });
 
     if ((isCancelled || isFailed) && payment && payment.tutor_id) {
-      const deleted = await query(
-        `DELETE FROM tutors
-         WHERE id = $1 AND is_active = FALSE AND annual_fee_paid = FALSE
+      const updated = await query(
+        `UPDATE tutors
+         SET is_active = FALSE,
+             annual_fee_paid = FALSE,
+             updated_at = NOW()
+         WHERE id = $1 AND is_active = FALSE
          RETURNING id`,
         [payment.tutor_id]
       );
-      payment.deletedPendingTutor = deleted.rows.length > 0;
+      payment.pendingTutorMarkedInactive = updated.rows.length > 0;
     }
 
     res.json({
@@ -321,9 +324,11 @@ router.post('/mpesa/callback', async (req, res, next) => {
           );
         } else {
           await query(
-            `DELETE FROM tutors
-             WHERE id = $1 AND is_active = FALSE AND annual_fee_paid = FALSE
-             RETURNING id`,
+            `UPDATE tutors
+             SET annual_fee_paid = FALSE,
+                 is_active = FALSE,
+                 updated_at = NOW()
+             WHERE id = $1`,
             [payment.tutor_id]
           );
         }
