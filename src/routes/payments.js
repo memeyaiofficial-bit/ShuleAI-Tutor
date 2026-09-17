@@ -129,18 +129,18 @@ router.post('/mpesa/initiate', authRequired, async (req, res, next) => {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
+      body: JSON.stringify({ 
         BusinessShortCode: process.env.MPESA_SHORTCODE,
         Password: password,
         Timestamp: timestamp,
-        TransactionType: 'CustomerPayBillOnline',
+        TransactionType: 'CustomerBuyGoodsOnline',
         Amount: normalizedAmount,
         PartyA: phoneNumber.replace(/\D/g, ''),
-        PartyB: process.env.MPESA_SHORTCODE,
+        PartyB: 5628512,
         PhoneNumber: phoneNumber.replace(/\D/g, ''),
         CallBackURL: process.env.MPESA_CALLBACK_URL || 'https://example.com/mpesa/callback',
         AccountReference: purpose,
-        TransactionDesc: `Shule AI Plus ${purpose}`,
+        TransactionDesc: `Shule AI Plus  Tutor  ${purpose}`,
       }),
     });
 
