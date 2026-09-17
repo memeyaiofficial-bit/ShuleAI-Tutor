@@ -470,7 +470,7 @@
         <h1>Get a tutor. Help your child do better, starting today.</h1>
         <p class="hero-sub">Book vetted, TSC-registered teachers for one-on-one sessions in Maths, Sciences, English, Kiswahili and every CBC subject — in your county, at a time that works for you.</p>
         <div class="hero-ctas">
-          <a href="#teachers" class="btn btn-primary">Book a Tutor Now</a>
+          <a href="#teachers" class="btn btn-primary">Find a Tutor</a>
           <a href="#" class="btn btn-outline-light" data-view="become">Become a Tutor</a>
         </div>
         <div class="hero-stats">
@@ -1096,15 +1096,15 @@ function renderBookingStep1(){
   const body = document.getElementById('bookingModalBody');
   body.innerHTML = `
     <div class="step-dots"><span class="active"></span><span></span><span></span></div>
-    <h3>Book a session</h3>
-    <p class="sub">Choose an open time slot below. Marigold cells are available.</p>
+    <h3>Choose a session</h3>
+    <p class="sub">Pick a time that works for your child. Open slots are highlighted for quick booking.</p>
     <div class="modal-teacher">
       <div class="avatar" style="background:${colorFor(t.name)}">${initials(t.name)}</div>
       <div><b>${t.name}</b><br><small>${t.subjects.join(', ')} · ${t.county} · KES ${t.rate}/hr</small></div>
     </div>
     <div class="avail-wrap">${buildReadonlyGrid(t, true)}</div>
     <div class="form-actions">
-      <button class="btn btn-primary" id="toStep2Btn" disabled>Continue</button>
+      <button class="btn btn-primary" id="toStep2Btn" disabled>Continue to details</button>
     </div>
   `;
   body.querySelectorAll('.slot-cell[data-day]').forEach(cell=>{
@@ -1125,8 +1125,8 @@ function renderBookingStep2(){
   const body = document.getElementById('bookingModalBody');
   body.innerHTML = `
     <div class="step-dots"><span class="active"></span><span class="active"></span><span></span></div>
-    <h3>Your details</h3>
-    <p class="sub">We'll send this booking to ${t.name.split(' ')[0]} by WhatsApp and email.</p>
+    <h3>Tell us about your child</h3>
+    <p class="sub">We’ll send your booking request to ${t.name.split(' ')[0]} by WhatsApp and email so they can confirm the session.</p>
     <div class="modal-teacher">
       <div class="avatar" style="background:${colorFor(t.name)}">${initials(t.name)}</div>
       <div><b>${t.name}</b><br><small>${bookingState.day} · ${SLOTS[bookingState.slotIdx]} · KES ${t.rate}/session</small></div>
@@ -1139,7 +1139,7 @@ function renderBookingStep2(){
     <div class="field"><label>Child's grade / class</label><input type="text" id="pb-grade" placeholder="e.g. Grade 5"></div>
     <div class="form-actions">
       <button class="btn btn-outline" id="backStep1">Back</button>
-      <button class="btn btn-primary" id="toStep3Btn">Continue to payment</button>
+      <button class="btn btn-primary" id="toStep3Btn">Continue to secure payment</button>
     </div>
   `;
   document.getElementById('backStep1').addEventListener('click', renderBookingStep1);
@@ -1162,8 +1162,8 @@ function renderBookingStep3(){
   const body = document.getElementById('bookingModalBody');
   body.innerHTML = `
     <div class="step-dots"><span class="active"></span><span class="active"></span><span class="active"></span></div>
-    <h3>Pay with M-Pesa</h3>
-    <p class="sub">Send the prompt and enter your M-Pesa PIN to confirm this session.</p>
+    <h3>Secure your session</h3>
+    <p class="sub">Send the M-Pesa prompt now and confirm with your PIN to lock in the lesson.</p>
     <div class="modal-teacher">
       <div class="avatar" style="background:${colorFor(t.name)}">${initials(t.name)}</div>
       <div><b>${t.name}</b><br><small>${bookingState.day} · ${SLOTS[bookingState.slotIdx]}</small></div>
@@ -1172,7 +1172,7 @@ function renderBookingStep3(){
       <div class="fee-amt">KES ${t.rate} <span style="font-size:14px;font-weight:500;color:var(--ink-soft);">session fee</span></div>
       <p>Sent to: ${bookingState.parent.wa}</p>
       <div class="form-actions" style="margin-top:14px;justify-content:flex-start;">
-        <button class="btn btn-dark" id="sendPaymentBtn">Send M-Pesa Prompt · KES ${t.rate}</button>
+        <button class="btn btn-dark" id="sendPaymentBtn">Send payment prompt · KES ${t.rate}</button>
       </div>
       <div class="stk-status" id="bookingStkStatus">
         <div class="spinner"></div>
