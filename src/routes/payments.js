@@ -75,6 +75,18 @@ router.get('/status', authRequired, async (req, res, next) => {
     const isPaid = normalizedStatus === 'PAID';
     const isFailed = normalizedStatus === 'FAILED' || (!isPaid && !isCancelled && responseCode && responseCode !== '0' && responseCode !== '200');
 
+    console.log('[MPESA STATUS]', {
+      tutorId,
+      paymentId: payment ? payment.id : null,
+      status: payment ? payment.status : 'PENDING',
+      normalizedStatus,
+      responseCode,
+      isPaid,
+      isCancelled,
+      isFailed,
+      updatedAt: payment ? payment.updated_at : null,
+    });
+
     if ((isCancelled || isFailed) && payment && payment.tutor_id) {
       const deleted = await query(
         `DELETE FROM tutors
@@ -96,6 +108,7 @@ router.get('/status', authRequired, async (req, res, next) => {
       annualFeePaid: isPaid,
     });
   } catch (error) {
+    console.error('[MPESA STATUS ERROR]', error);
     next(error);
   }
 });
@@ -164,6 +177,16 @@ router.post('/mpesa/initiate', authRequired, async (req, res, next) => {
       'utf8'
     ).toString('base64');
 
+    console.log('[MPESA INITIATE]', {
+      tutorId,
+      amount: normalizedAmount,
+      phoneNumber,
+      purpose,
+      transactionReference,
+      callbackUrl: process.env.MPESA_CALLBACK_URL || 'https://example.com/mpesa/callback',
+      darajaEnv: process.env.MPESA_ENVIRONMENT || 'sandbox',
+    });
+
     const response = await fetch(`${getDarajaBaseUrl()}/mpesa/stkpush/v1/processrequest`, {
       method: 'POST',
       headers: {
@@ -186,6 +209,12 @@ router.post('/mpesa/initiate', authRequired, async (req, res, next) => {
     });
 
     const darajaPayload = await response.json().catch(() => ({}));
+
+    console.log('[MPESA DARAJA RESPONSE]', {
+      status: response.status,
+      ok: response.ok,
+      payload: darajaPayload,
+    });
 
     if (!response.ok) {
       throw new Error(darajaPayload.errorMessage || darajaPayload.message || 'Daraja STK push failed');
@@ -238,6 +267,17 @@ router.post('/mpesa/callback', async (req, res, next) => {
     const cancelledCodes = ['1032', '1037', '1038', '1041'];
     const normalizedStatus = resultCode === 0 ? 'PAID' : cancelledCodes.includes(String(resultCode)) ? 'CANCELLED' : 'FAILED';
 
+    console.log('[MPESA CALLBACK IN]', {
+      requestId,
+      checkoutRequestId,
+      resultCode,
+      resultDesc,
+      phoneNumber,
+      amount,
+      normalizedStatus,
+      payload: Object.keys(payload).length ? payload : null,
+    });
+
     const paymentResult = await query(
       `UPDATE payments
        SET status = $1,
@@ -286,6 +326,14 @@ router.post('/mpesa/callback', async (req, res, next) => {
       }
     }
 
+    console.log('[MPESA CALLBACK OUT]', {
+      rowsUpdated: paymentResult.rowCount,
+      status: normalizedStatus,
+      requestId,
+      checkoutRequestId,
+      transactionDate: transactionRefItem ? transactionRefItem.Value : null,
+    });
+
     return res.json({
       message: 'M-Pesa callback processed.',
       updated: paymentResult.rowCount,
@@ -293,6 +341,7 @@ router.post('/mpesa/callback', async (req, res, next) => {
       transactionDate: transactionRefItem ? transactionRefItem.Value : null,
     });
   } catch (error) {
+    console.error('[MPESA CALLBACK ERROR]', error);
     next(error);
   }
 });

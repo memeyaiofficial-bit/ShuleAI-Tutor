@@ -82,3 +82,6 @@
 2026-09-17 06:51:48.974 EAT [6044] LOG:  checkpoint starting: end-of-recovery immediate wait
 2026-09-17 06:51:49.036 EAT [6044] LOG:  checkpoint complete: wrote 9 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.034 s, sync=0.007 s, total=0.065 s; sync files=8, longest=0.002 s, average=0.001 s; distance=5 kB, estimate=5 kB; lsn=0/1A55CF8, redo lsn=0/1A55CF8
 2026-09-17 06:51:49.131 EAT [13664] LOG:  database system is ready to accept connections
+2026-09-17 15:15:29.791 EAT [13664] LOG:  background worker "logical replication launcher" (PID 23808) was terminated by exception 0xC000013A
+2026-09-17 15:15:29.791 EAT [13664] HINT:  See C include file "ntstatus.h" for a description of the hexadecimal value.
+2026-09-17 15:15:29.818 EAT [13664] LOG:  terminating any other active server processes
