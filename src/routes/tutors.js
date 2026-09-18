@@ -268,6 +268,10 @@ router.post('/', async (req, res, next) => {
     res.status(201).json({ message: 'Tutor created successfully', id: tutorId });
   } catch (error) {
     await client.query('ROLLBACK');
+    if (error.code === '23505') {
+      // Unique violation on tutors_email_key
+      return res.status(409).json({ message: 'A tutor with this email already exists.' });
+    }
     next(error);
   } finally {
     client.release();
