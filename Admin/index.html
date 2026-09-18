@@ -539,11 +539,27 @@
           email: formData.get('email').toString().trim(),
           whatsapp: formData.get('whatsapp').toString().trim(),
           county: formData.get('county').toString().trim(),
+          tscNumber: formData.get('tscNumber') ? formData.get('tscNumber').toString().trim() : undefined,
+          idNumber: formData.get('idNumber') ? formData.get('idNumber').toString().trim() : undefined,
           hourlyRate: Number(formData.get('rate') || 500),
           subjects: (formData.get('subjects') || '')
             .toString()
             .split(',')
             .map((subject) => subject.trim())
+            .filter(Boolean),
+          availability: (() => {
+            try {
+              const val = formData.get('availability');
+              return val ? JSON.parse(val) : {};
+            } catch (e) {
+              console.warn('Invalid availability JSON, defaulting to empty');
+              return {};
+            }
+          })(),
+          holidays: (formData.get('holidays') || '')
+            .toString()
+            .split(',')
+            .map((d) => d.trim())
             .filter(Boolean),
         };
 
