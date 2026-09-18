@@ -192,10 +192,26 @@ router.post('/', async (req, res, next) => {
     return res.status(400).json({ message: 'Missing required tutor details.' });
   }
 
+  const normalizedEmail = String(email).trim().toLowerCase();
+  const normalizedWhatsapp = String(whatsapp).trim();
+
   const client = await pool.connect();
 
   try {
     await client.query('BEGIN');
+
+    // Check for existing tutor (including soft-deleted) with same email or WhatsApp
+    const existing = await client.query(
+      'SELECT id, is_active FROM tutors WHERE LOWER(email) = LOWER($1) OR whatsapp = $2 LIMIT 1',
+      [normalizedEmail, normalizedWhatsapp]
+    );
+
+    if (existing.rows.length > 0) {
+      await client.query('ROLLBACK');
+      return res.status(409).json({
+        message: 'A tutor with this email or WhatsApp already exists (possibly deactivated).',
+      });
+    }
 
     const insertTutor = await client.query(
       `INSERT INTO tutors (
@@ -214,7 +230,7 @@ router.post('/', async (req, res, next) => {
         created_at,
         updated_at
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 5.0, 0, FALSE, FALSE, NOW(), NOW()) RETURNING *`,
-      [fullName, email, whatsapp, tscNumber || null, idNumber || null, county, Number(hourlyRate || 0), '']
+      [fullName, normalizedEmail, normalizedWhatsapp, tscNumber || null, idNumber || null, county, Number(hourlyRate || 0), '']
     );
 
     const tutorId = insertTutor.rows[0].id;
