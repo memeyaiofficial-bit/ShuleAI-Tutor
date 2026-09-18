@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const tutorsRouter = require('./src/routes/tutors');
@@ -36,6 +37,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/tutors', tutorsRouter);
 app.use('/api/bookings', bookingsRouter);
 app.use('/api/payments', paymentsRouter);
+app.use('/admin', express.static(path.join(__dirname, 'Admin')));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

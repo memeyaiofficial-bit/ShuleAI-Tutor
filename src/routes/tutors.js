@@ -152,6 +152,28 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
+router.delete('/:id', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await query(
+      `UPDATE tutors
+       SET is_active = FALSE,
+           updated_at = NOW()
+       WHERE id = $1
+       RETURNING id, full_name` ,
+      [Number(id)]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Tutor not found.' });
+    }
+
+    res.json({ message: 'Tutor removed successfully', tutor: result.rows[0] });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.post('/', async (req, res, next) => {
   const {
     fullName,

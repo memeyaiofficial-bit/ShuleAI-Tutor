@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShuleTutor Admin Dashboard</title>
+    <style>
+      :root {
+        --bg: #f4f7fb;
+        --panel: #ffffff;
+        --panel-alt: #eef4ff;
+        --primary: #1849a9;
+        --primary-strong: #0c2d70;
+        --success: #1f9d61;
+        --warning: #f7b731;
+        --danger: #d94c4c;
+        --text: #1d2433;
+        --muted: #667085;
+        --border: #dfe3ec;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .brand {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--primary-strong);
+      }
+
+      .badge {
+        background: var(--panel-alt);
+        color: var(--primary);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 18px;
+        margin-bottom: 24px;
+      }
+
+      .stat-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 18px 20px;
+        box-shadow: 0 2px 8px rgba(23, 41, 82, 0.04);
+      }
+
+      .stat-label {
+        color: var(--muted);
+        font-size: 0.82rem;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-strong);
+      }
+
+      .stat-sub {
+        margin-top: 8px;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 24px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: 0 2px 8px rgba(23, 41, 82, 0.04);
+        padding: 20px;
+      }
+
+      .panel h2 {
+        margin: 0 0 18px;
+        font-size: 1.125rem;
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .field label {
+        font-size: 0.8rem;
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .field input,
+      .field textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 0.96rem;
+        background: #fff;
+      }
+
+      .field input:focus,
+      .field textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+       box-shadow: 0 0 0 2px rgba(24, 73, 169, 0.12);
+      }
+
+      button {
+        border: none;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 0.96rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .primary-btn {
+        background: var(--primary);
+        color: white;
+      }
+
+      .ghost-btn {
+        background: #f5f7ff;
+        color: var(--primary);
+        border: 1px solid var(--border);
+      }
+
+      .danger-btn {
+        background: rgba(217, 76, 76, 0.08);
+        color: var(--danger);
+        border: 1px solid rgba(217, 76, 76, 0.18);
+      }
+
+      .tutor-list,
+      .table-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .tutor-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: #fafcff;
+      }
+
+      .tutor-meta {
+        display: grid;
+        gap: 3px;
+      }
+
+      .tutor-meta strong {
+        font-size: 0.96rem;
+      }
+
+      .tiny {
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.92rem;
+      }
+
+      th, td {
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        padding: 10px 8px;
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .status-pill {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+      }
+
+      .status-confirmed { background: rgba(31, 157, 97, 0.12); color: var(--success); }
+      .status-pending { background: rgba(247, 183, 49, 0.14); color: #a36b00; }
+      .status-cancelled { background: rgba(217, 76, 76, 0.1); color: var(--danger); }
+      .status-paid { background: rgba(31, 157, 97, 0.12); color: var(--success); }
+      .status-failed { background: rgba(217, 76, 76, 0.1); color: var(--danger); }
+
+      .empty {
+        color: var(--muted);
+        padding: 16px 8px;
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="topbar">
+        <div class="brand">ShuleTutor Admin</div>
+        <div class="badge" id="refreshBadge">Live overview</div>
+      </header>
+
+      <div class="stats-grid" id="statsGrid"></div>
+
+      <div class="layout">
+        <aside class="panel">
+          <h2>Add tutor</h2>
+          <form id="addTutorForm" class="form-grid">
+            <div class="field">
+              <label for="fullName">Full name</label>
+              <input id="fullName" name="fullName" required />
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" required />
+            </div>
+            <div class="field">
+              <label for="whatsapp">WhatsApp</label>
+              <input id="whatsapp" name="whatsapp" placeholder="+254712345678" required />
+            </div>
+            <div class="field">
+              <label for="county">County</label>
+              <input id="county" name="county" required />
+            </div>
+            <div class="field">
+              <label for="rate">Hourly rate</label>
+              <input id="rate" name="rate" type="number" min="100" value="500" />
+            </div>
+            <div class="field">
+              <label for="subjects">Subjects</label>
+              <input id="subjects" name="subjects" placeholder="Math, Physics, Biology" />
+            </div>
+            <button type="submit" class="primary-btn">Add Tutor</button>
+          </form>
+        </aside>
+
+        <main>
+          <section class="panel" style="margin-bottom: 24px;">
+            <h2>Active tutors</h2>
+            <div id="tutorsList" class="tutor-list"></div>
+          </section>
+
+          <section class="panel" style="margin-bottom: 24px;">
+            <h2>Recent bookings</h2>
+            <div class="table-list">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Parent</th>
+                    <th>Tutor</th>
+                    <th>Day</th>
+                    <th>Slot</th>
+                    <th>Status</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="bookingsTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2>Recent payments</h2>
+            <div class="table-list">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Purpose</th>
+                    <th>Phone</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                  </tr>
+                </thead>
+                <tbody id="paymentsTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      const currency = new Intl.NumberFormat('en-KE', {
+        style: 'currency',
+        currency: 'KES',
+        maximumFractionDigits: 0,
+      });
+
+      const statsGrid = document.getElementById('statsGrid');
+      const tutorsList = document.getElementById('tutorsList');
+      const bookingsTableBody = document.getElementById('bookingsTableBody');
+      const paymentsTableBody = document.getElementById('paymentsTableBody');
+
+      async function apiFetch(url, options = {}) {
+        const response = await fetch(url, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {}),
+          },
+          ...options,
+        });
+
+        const text = await response.text();
+        let data = null;
+        try {
+          data = text ? JSON.parse(text) : null;
+        } catch (error) {
+          data = null;
+        }
+
+        if (!response.ok) {
+          throw new Error(data?.message || 'Request failed');
+        }
+
+        return data;
+      }
+
+      function makeStat(label, value, subtext = '') {
+        const card = document.createElement('div');
+        card.className = 'stat-card';
+        card.innerHTML = `
+          <div class="stat-label">${label}</div>
+          <div class="stat-value">${value}</div>
+          ${subtext ? `<div class="stat-sub">${subtext}</div>` : ''}
+        `;
+        return card;
+      }
+
+      function buildStatusClass(status) {
+        const normalized = String(status || '').toLowerCase();
+        if (normalized.includes('paid') || normalized === 'confirmed') return 'status-paid';
+        if (normalized.includes('pending')) return 'status-pending';
+        if (normalized.includes('cancel')) return 'status-cancelled';
+        if (normalized.includes('fail')) return 'status-failed';
+        return 'status-pending';
+      }
+
+      function formatMoney(value) {
+        return currency.format(Number(value || 0));
+      }
+
+      function getTutorDisplay(tutor) {
+        return tutor?.name || tutor?.full_name || 'Unknown tutor';
+      }
+
+      function renderStatistics(summary) {
+        statsGrid.innerHTML = '';
+
+        const cards = [
+          makeStat('Total bookings', summary.totalBookings || 0, `${summary.confirmedBookings || 0} confirmed`),
+          makeStat('Total tutors', summary.totalTutors || 0, `${summary.activeTutors || 0} active`),
+          makeStat('Payments made', summary.successfulPayments || 0, `${summary.totalPayments || 0} total records`),
+          makeStat('Revenue', formatMoney(summary.paymentRevenue || summary.bookingRevenue || 0), `${summary.totalTutors || 0} registered tutors`),
+        ];
+
+        cards.forEach((card) => statsGrid.appendChild(card));
+      }
+
+      function renderTutors(tutors) {
+        tutorsList.innerHTML = '';
+
+        if (!tutors.length) {
+          tutorsList.innerHTML = '<div class="empty">No tutors yet.</div>';
+          return;
+        }
+
+        tutors.forEach((tutor) => {
+          const row = document.createElement('div');
+          row.className = 'tutor-item';
+          row.innerHTML = `
+            <div class="tutor-meta">
+              <strong>${getTutorDisplay(tutor)}</strong>
+              <span class="tiny">${tutor.email || 'No email'} · ${tutor.county || 'No county'}</span>
+              <span class="tiny">${Array.isArray(tutor.subjects) && tutor.subjects.length ? tutor.subjects.join(', ') : 'No subjects set'}</span>
+            </div>
+            <button class="danger-btn" data-remove-id="${tutor.id}">Remove</button>
+          `;
+          tutorsList.appendChild(row);
+        });
+
+        document.querySelectorAll('[data-remove-id]').forEach((button) => {
+          button.addEventListener('click', async () => {
+            const id = button.getAttribute('data-remove-id');
+            const tutorName = button.closest('.tutor-item')?.querySelector('strong')?.textContent || 'Tutor';
+            if (!window.confirm(`Remove ${tutorName}?`)) return;
+
+            try {
+              await apiFetch(`/api/tutors/${id}`, { method: 'DELETE' });
+              await loadDashboard();
+            } catch (error) {
+              alert(error.message || 'Could not remove tutor.');
+            }
+          });
+        });
+      }
+
+      function renderBookings(bookings) {
+        bookingsTableBody.innerHTML = '';
+
+        if (!bookings.length) {
+          bookingsTableBody.innerHTML = '<tr><td colspan="6" class="empty">No bookings recorded yet.</td></tr>';
+          return;
+        }
+
+        bookings.slice(0, 8).forEach((booking) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${booking.parent_name || 'N/A'}</td>
+            <td>${booking.tutor_id || 'N/A'}</td>
+            <td>${booking.session_day || 'N/A'}</td>
+            <td>${booking.session_slot || 'N/A'}</td>
+            <td><span class="status-pill ${buildStatusClass(booking.status)}">${booking.status || 'Pending'}</span></td>
+            <td>${formatMoney(booking.amount || 0)}</td>
+          `;
+          bookingsTableBody.appendChild(row);
+        });
+      }
+
+      function renderPayments(payments) {
+        paymentsTableBody.innerHTML = '';
+
+        if (!payments.length) {
+          paymentsTableBody.innerHTML = '<tr><td colspan="5" class="empty">No payment activity yet.</td></tr>';
+          return;
+        }
+
+        payments.slice(0, 8).forEach((payment) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${payment.purpose || 'General'}</td>
+            <td>${payment.phone_number || 'N/A'}</td>
+            <td>${formatMoney(payment.amount || 0)}</td>
+            <td><span class="status-pill ${buildStatusClass(payment.status)}">${payment.status || 'Pending'}</span></td>
+            <td>${new Date(payment.created_at).toLocaleDateString()}</td>
+          `;
+          paymentsTableBody.appendChild(row);
+        });
+      }
+
+      async function loadDashboard() {
+        try {
+          const [tutors, bookings, summary, payments] = await Promise.all([
+            apiFetch('/api/tutors'),
+            apiFetch('/api/bookings'),
+            apiFetch('/api/payments/admin/summary'),
+            apiFetch('/api/payments/admin'),
+          ]);
+
+          renderStatistics(summary || {});
+          renderTutors(Array.isArray(tutors) ? tutors : []);
+          renderBookings(Array.isArray(bookings) ? bookings : []);
+          renderPayments(Array.isArray(payments) ? payments : []);
+        } catch (error) {
+          console.error(error);
+          tutorsList.innerHTML = `<div class="empty">Unable to load dashboard data: ${error.message}</div>`;
+        }
+      }
+
+      document.getElementById('addTutorForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(event.target);
+        const payload = {
+          fullName: formData.get('fullName').toString().trim(),
+          email: formData.get('email').toString().trim(),
+          whatsapp: formData.get('whatsapp').toString().trim(),
+          county: formData.get('county').toString().trim(),
+          hourlyRate: Number(formData.get('rate') || 500),
+          subjects: (formData.get('subjects') || '')
+            .toString()
+            .split(',')
+            .map((subject) => subject.trim())
+            .filter(Boolean),
+        };
+
+        if (!payload.fullName || !payload.email || !payload.whatsapp || !payload.county) {
+          alert('Please complete the form before adding a tutor.');
+          return;
+        }
+
+        try {
+          await apiFetch('/api/tutors', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+          });
+
+          event.target.reset();
+          document.getElementById('rate').value = '500';
+          await loadDashboard();
+        } catch (error) {
+          alert(error.message || 'Failed to add tutor.');
+        }
+      });
+
+      loadDashboard();
+    </script>
+  </body>
+</html>

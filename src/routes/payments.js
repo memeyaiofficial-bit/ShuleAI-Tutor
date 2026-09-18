@@ -60,6 +60,73 @@ router.get('/', authRequired, async (req, res, next) => {
   }
 });
 
+router.get('/admin', async (req, res, next) => {
+  try {
+    const result = await query(`
+      SELECT *
+      FROM payments
+      ORDER BY created_at DESC
+      LIMIT 15
+    `);
+
+    res.json(result.rows);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/admin/summary', async (req, res, next) => {
+  try {
+    const [bookingSummary, tutorSummary, paymentSummary] = await Promise.all([
+      query(`
+        SELECT
+          COUNT(*)::int AS total_bookings,
+          COALESCE(SUM(CASE WHEN status = 'Confirmed' THEN 1 ELSE 0 END), 0)::int AS confirmed_bookings,
+          COALESCE(SUM(CASE WHEN status = 'Cancelled' THEN 1 ELSE 0 END), 0)::int AS cancelled_bookings,
+          COALESCE(SUM(CASE WHEN status = 'Pending Payment' THEN 1 ELSE 0 END), 0)::int AS pending_bookings,
+          COALESCE(SUM(CAST(amount AS NUMERIC)), 0) AS booking_revenue
+        FROM bookings
+      `),
+      query(`
+        SELECT
+          COUNT(*)::int AS total_tutors,
+          COALESCE(SUM(CASE WHEN is_active = TRUE THEN 1 ELSE 0 END), 0)::int AS active_tutors,
+          COALESCE(SUM(CASE WHEN annual_fee_paid = TRUE THEN 1 ELSE 0 END), 0)::int AS paid_tutors
+        FROM tutors
+      `),
+      query(`
+        SELECT
+          COUNT(*)::int AS total_payments,
+          COALESCE(SUM(CASE WHEN status = 'PAID' THEN 1 ELSE 0 END), 0)::int AS successful_payments,
+          COALESCE(SUM(CASE WHEN status = 'INITIATED' THEN 1 ELSE 0 END), 0)::int AS initiated_payments,
+          COALESCE(SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END), 0)::int AS failed_payments,
+          COALESCE(SUM(CASE WHEN status = 'PAID' THEN CAST(amount AS NUMERIC) ELSE 0 END), 0) AS payment_revenue
+        FROM payments
+      `)
+    ]);
+
+    const summary = {
+      totalBookings: Number(bookingSummary.rows[0]?.total_bookings || 0),
+      confirmedBookings: Number(bookingSummary.rows[0]?.confirmed_bookings || 0),
+      cancelledBookings: Number(bookingSummary.rows[0]?.cancelled_bookings || 0),
+      pendingBookings: Number(bookingSummary.rows[0]?.pending_bookings || 0),
+      bookingRevenue: Number(bookingSummary.rows[0]?.booking_revenue || 0),
+      totalTutors: Number(tutorSummary.rows[0]?.total_tutors || 0),
+      activeTutors: Number(tutorSummary.rows[0]?.active_tutors || 0),
+      paidTutors: Number(tutorSummary.rows[0]?.paid_tutors || 0),
+      totalPayments: Number(paymentSummary.rows[0]?.total_payments || 0),
+      successfulPayments: Number(paymentSummary.rows[0]?.successful_payments || 0),
+      initiatedPayments: Number(paymentSummary.rows[0]?.initiated_payments || 0),
+      failedPayments: Number(paymentSummary.rows[0]?.failed_payments || 0),
+      paymentRevenue: Number(paymentSummary.rows[0]?.payment_revenue || 0),
+    };
+
+    res.json(summary);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get('/status', authRequired, async (req, res, next) => {
   try {
     const tutorId = Number(req.user.sub);
