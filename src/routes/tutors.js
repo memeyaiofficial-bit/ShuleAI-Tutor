@@ -195,23 +195,37 @@ router.post('/', async (req, res, next) => {
   const normalizedEmail = String(email).trim().toLowerCase();
   const normalizedWhatsapp = String(whatsapp).trim();
 
+  // First, check for duplicates BEFORE starting a transaction to avoid race conditions
+  const existing = await query(
+    'SELECT id, is_active, email, whatsapp FROM tutors WHERE LOWER(email) = LOWER($1) OR whatsapp = $2 LIMIT 1',
+    [normalizedEmail, normalizedWhatsapp]
+  );
+
+  if (existing.rows.length > 0) {
+    const found = existing.rows[0];
+    const isEmailMatch = found.email && found.email.toLowerCase() === normalizedEmail;
+    const isWhatsappMatch = found.whatsapp === normalizedWhatsapp;
+
+    let errorMessage = 'A tutor with this email or WhatsApp already exists.';
+    if (isEmailMatch && !isWhatsappMatch) {
+      errorMessage = `The email "${normalizedEmail}" is already in use.`;
+    } else if (!isEmailMatch && isWhatsappMatch) {
+      errorMessage = `The WhatsApp number "${normalizedWhatsapp}" is already in use.`;
+    } else if (isEmailMatch && isWhatsappMatch) {
+      errorMessage = `Both the email and WhatsApp number are already in use.`;
+    }
+
+    if (!found.is_active) {
+      errorMessage += ' (This record may have been deactivated.)';
+    }
+
+    return res.status(409).json({ message: errorMessage });
+  }
+
   const client = await pool.connect();
 
   try {
     await client.query('BEGIN');
-
-    // Check for existing tutor (including soft-deleted) with same email or WhatsApp
-    const existing = await client.query(
-      'SELECT id, is_active FROM tutors WHERE LOWER(email) = LOWER($1) OR whatsapp = $2 LIMIT 1',
-      [normalizedEmail, normalizedWhatsapp]
-    );
-
-    if (existing.rows.length > 0) {
-      await client.query('ROLLBACK');
-      return res.status(409).json({
-        message: 'A tutor with this email or WhatsApp already exists (possibly deactivated).',
-      });
-    }
 
     const insertTutor = await client.query(
       `INSERT INTO tutors (
