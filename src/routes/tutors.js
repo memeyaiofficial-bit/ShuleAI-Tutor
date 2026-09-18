@@ -206,20 +206,28 @@ router.post('/', async (req, res, next) => {
     const isEmailMatch = found.email && found.email.toLowerCase() === normalizedEmail;
     const isWhatsappMatch = found.whatsapp === normalizedWhatsapp;
 
+    console.log('[DEBUG] Duplicate check:', {
+      normalizedEmail,
+      normalizedWhatsapp,
+      foundRecord: found,
+      isEmailMatch,
+      isWhatsappMatch
+    });
+
     let errorMessage = 'A tutor with this email or WhatsApp already exists.';
     if (isEmailMatch && !isWhatsappMatch) {
-      errorMessage = `The email "${normalizedEmail}" is already in use.`;
+      errorMessage = `The email "${normalizedEmail}" is already in use by tutor ID ${found.id}.`;
     } else if (!isEmailMatch && isWhatsappMatch) {
-      errorMessage = `The WhatsApp number "${normalizedWhatsapp}" is already in use.`;
+      errorMessage = `The WhatsApp number "${normalizedWhatsapp}" is already in use by tutor ID ${found.id}.`;
     } else if (isEmailMatch && isWhatsappMatch) {
-      errorMessage = `Both the email and WhatsApp number are already in use.`;
+      errorMessage = `Both the email and WhatsApp number are already in use by tutor ID ${found.id}.`;
     }
 
     if (!found.is_active) {
-      errorMessage += ' (This record may have been deactivated.)';
+      errorMessage += ' (This record has been deactivated.)';
     }
 
-    return res.status(409).json({ message: errorMessage });
+    return res.status(409).json({ message: errorMessage, conflictId: found.id, isDeactivated: !found.is_active });
   }
 
   const client = await pool.connect();
