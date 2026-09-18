@@ -351,6 +351,7 @@
     </div>
 
     <script>
+      const API_BASE = 'https://shuleai-tutor-backend.onrender.com';
       const currency = new Intl.NumberFormat('en-KE', {
         style: 'currency',
         currency: 'KES',
@@ -363,7 +364,9 @@
       const paymentsTableBody = document.getElementById('paymentsTableBody');
 
       async function apiFetch(url, options = {}) {
-        const response = await fetch(url, {
+        // Prepend backend base URL for relative API paths
+        const fullUrl = url.startsWith('http') ? url : `${API_BASE}${url}`;
+        const response = await fetch(fullUrl, {
           headers: {
             'Content-Type': 'application/json',
             ...(options.headers || {}),

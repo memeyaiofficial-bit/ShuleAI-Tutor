@@ -206,14 +206,15 @@ router.post('/', async (req, res, next) => {
         id_number,
         county,
         hourly_rate,
+        password_hash,
         rating,
         review_count,
         is_active,
         annual_fee_paid,
         created_at,
         updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, 5.0, 0, FALSE, FALSE, NOW(), NOW()) RETURNING *`,
-      [fullName, email, whatsapp, tscNumber || null, idNumber || null, county, Number(hourlyRate || 0)]
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 5.0, 0, FALSE, FALSE, NOW(), NOW()) RETURNING *`,
+      [fullName, email, whatsapp, tscNumber || null, idNumber || null, county, Number(hourlyRate || 0), '']
     );
 
     const tutorId = insertTutor.rows[0].id;
