@@ -1185,22 +1185,41 @@ function renderBookingStep3(){
       </div>
     </div>
   `;
-  document.getElementById('sendPaymentBtn').addEventListener('click', (e)=>{
+  document.getElementById('sendPaymentBtn').addEventListener('click', async (e)=>{
     e.target.disabled = true;
     const status = document.getElementById('bookingStkStatus');
     const text = document.getElementById('bookingStkText');
     status.classList.add('is-visible');
     status.classList.remove('success');
-    text.textContent = 'Waiting for the M-Pesa confirmation on your phone…';
-    toast('The payment prompt has been sent. The booking stays pending until the real M-Pesa result is received.');
-    /* Do NOT auto-confirm the booking here.
-       A parent booking must only be finalized after a real Daraja callback or
-       confirmed backend payment status. */
+    text.textContent = 'Sending M-Pesa prompt to your phone…';
+
+    try {
+      const prompt = await apiFetch('/api/payments/mpesa/initiate', {
+        method: 'POST',
+        body: JSON.stringify({
+          tutorId: bookingState.teacher.id,
+          amount: bookingState.teacher.rate,
+          phoneNumber: bookingState.parent.wa,
+          purpose: 'booking_payment',
+        }),
+      });
+
+      await finalizeBooking({ status: 'Pending Payment' });
+      status.classList.add('success');
+      text.textContent = 'Prompt sent successfully — please approve it on your phone.';
+      toast(prompt?.message || 'M-Pesa prompt sent successfully.');
+    } catch (error) {
+      status.classList.remove('success');
+      text.textContent = error.message || 'The payment prompt could not be sent.';
+      toast(error.message || 'The payment prompt could not be sent.');
+      e.target.disabled = false;
+    }
   });
 }
 
-async function finalizeBooking(){
+async function finalizeBooking(options = {}){
   const t = bookingState.teacher;
+  const bookingStatus = options.status || 'Confirmed';
   const bookingPayload = {
     tutorId: t.id,
     parentName: bookingState.parent.name,
@@ -1210,7 +1229,7 @@ async function finalizeBooking(){
     day: bookingState.day,
     slot: SLOTS[bookingState.slotIdx],
     amount: t.rate,
-    status: 'Confirmed',
+    status: bookingStatus,
   };
 
   try {
@@ -1239,7 +1258,7 @@ async function finalizeBooking(){
       day: bookingState.day,
       slot: SLOTS[bookingState.slotIdx],
       amount: t.rate,
-      status: 'Confirmed',
+      status: bookingStatus,
     });
     console.warn('Booking save failed, using local fallback:', error);
   }

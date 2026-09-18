@@ -116,20 +116,26 @@ router.get('/status', authRequired, async (req, res, next) => {
   }
 });
 
-router.post('/mpesa/initiate', authRequired, async (req, res, next) => {
+router.post('/mpesa/initiate', async (req, res, next) => {
   try {
     const {
       amount,
       phoneNumber,
       purpose = 'annual_fee',
       bookingId = null,
+      tutorId: tutorIdFromBody,
     } = req.body;
 
     if (!amount || !phoneNumber) {
       return res.status(400).json({ message: 'Amount and phone number are required.' });
     }
 
-    const tutorId = Number(req.user.sub);
+    const tutorId = req.user ? Number(req.user.sub) : Number(tutorIdFromBody ?? req.body.tutor_id ?? req.body.tutorId);
+
+    if (!tutorId || Number.isNaN(tutorId)) {
+      return res.status(400).json({ message: 'Tutor id is required for the payment prompt.' });
+    }
+
     const normalizedAmount = Number(amount);
     const transactionReference = `${(process.env.MPESA_TRANSACTION_PREFIX || 'SHULE').toUpperCase()}-${Date.now()}`;
     const paymentStatus = hasDarajaConfig() ? 'INITIATED' : 'READY_FOR_PRODUCTION';
