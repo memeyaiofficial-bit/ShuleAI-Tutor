@@ -91,4 +91,32 @@ router.post('/', async (req, res, next) => {
   }
 });
 
+router.patch('/:id/status', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ message: 'Booking status is required.' });
+    }
+
+    const result = await query(
+      `UPDATE bookings
+       SET status = $1,
+           created_at = created_at
+       WHERE id = $2
+       RETURNING *`,
+      [String(status), Number(id)]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Booking not found.' });
+    }
+
+    res.json({ booking: result.rows[0] });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

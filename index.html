@@ -377,6 +377,14 @@
   .booking-when{
     font-size:13.5px;background:var(--paper);padding:8px 12px;border-radius:var(--radius-sm);font-weight:600;
   }
+  .booking-status{
+    display:inline-flex;align-items:center;justify-content:center;
+    padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;
+    border:1px solid transparent;
+  }
+  .booking-status.pending{background:rgba(222,143,38,.12);color:#8d5a0c;border-color:rgba(222,143,38,.25);}
+  .booking-status.confirmed{background:rgba(60,150,90,.12);color:#2d6e3f;border-color:rgba(60,150,90,.24);}
+  .booking-status.cancelled{background:rgba(124,48,48,.10);color:var(--maroon);border-color:rgba(124,48,48,.18);}
   .booking-actions{display:flex;gap:8px;}
   .icon-btn{
     width:38px;height:38px;border-radius:50%;background:var(--paper);display:flex;align-items:center;
@@ -1191,12 +1199,14 @@ function renderBookingStep3(){
     const text = document.getElementById('bookingStkText');
     status.classList.add('is-visible');
     status.classList.remove('success');
-    text.textContent = 'Sending M-Pesa prompt to your phone…';
+    text.textContent = 'Creating booking and sending M-Pesa prompt…';
 
     try {
+      const savedBooking = await finalizeBooking({ status: 'Pending Payment' });
       const prompt = await apiFetch('/api/payments/mpesa/initiate', {
         method: 'POST',
         body: JSON.stringify({
+          bookingId: savedBooking.id,
           tutorId: bookingState.teacher.id,
           amount: bookingState.teacher.rate,
           phoneNumber: bookingState.parent.wa,
@@ -1204,11 +1214,19 @@ function renderBookingStep3(){
         }),
       });
 
-      await finalizeBooking({ status: 'Pending Payment' });
       status.classList.add('success');
       text.textContent = 'Prompt sent successfully — please approve it on your phone.';
       toast(prompt?.message || 'M-Pesa prompt sent successfully.');
     } catch (error) {
+      const pendingBooking = bookings.find((entry) =>
+        entry.teacherId === bookingState.teacher.id &&
+        entry.parentEmail === bookingState.parent.email &&
+        entry.day === bookingState.day &&
+        entry.slot === SLOTS[bookingState.slotIdx]
+      );
+      if (pendingBooking) {
+        pendingBooking.status = 'Cancelled';
+      }
       status.classList.remove('success');
       text.textContent = error.message || 'The payment prompt could not be sent.';
       toast(error.message || 'The payment prompt could not be sent.');
@@ -1237,8 +1255,8 @@ async function finalizeBooking(options = {}){
       method: 'POST',
       body: JSON.stringify(bookingPayload),
     });
-    const savedBooking = saved.booking || saved;
-    bookings.push(normalizeBookingRow(savedBooking));
+    const savedBooking = normalizeBookingRow(saved.booking || saved);
+    bookings.push(savedBooking);
 
     const tutorMessage = saved.tutorMessage || `Hi ${t.name}, ${bookingState.parent.name} has booked a session with you on ${bookingState.day} at ${SLOTS[bookingState.slotIdx]}. Please contact ${bookingState.parent.wa}.`;
     const tutorWhatsapp = saved.tutorWhatsapp || t.whatsapp;
@@ -1247,8 +1265,10 @@ async function finalizeBooking(options = {}){
       const messageUrl = waLink(tutorWhatsapp, tutorMessage);
       window.open(messageUrl, '_blank', 'noopener,noreferrer');
     }
+
+    return savedBooking;
   } catch (error) {
-    bookings.push({
+    const fallbackBooking = {
       id: nextBookingId++,
       teacherId: t.id,
       parentName: bookingState.parent.name,
@@ -1259,8 +1279,10 @@ async function finalizeBooking(options = {}){
       slot: SLOTS[bookingState.slotIdx],
       amount: t.rate,
       status: bookingStatus,
-    });
+    };
+    bookings.push(fallbackBooking);
     console.warn('Booking save failed, using local fallback:', error);
+    return fallbackBooking;
   }
 }
 
@@ -1635,6 +1657,23 @@ document.getElementById('logoutBtn').addEventListener('click', ()=>{
   showView('home');
 });
 
+function getBookingStatusText(status = '') {
+  const value = String(status || '').trim();
+  if (!value) return 'Confirmed';
+  if (value.toLowerCase().includes('pending')) return 'Pending Payment';
+  if (value.toLowerCase().includes('cancel')) return 'Cancelled';
+  if (value.toLowerCase().includes('failed')) return 'Cancelled';
+  if (value.toLowerCase().includes('paid')) return 'Confirmed';
+  return value;
+}
+
+function getBookingStatusClass(status = '') {
+  const value = String(status || '').trim().toLowerCase();
+  if (value.includes('pending')) return 'pending';
+  if (value.includes('cancel') || value.includes('failed')) return 'cancelled';
+  return 'confirmed';
+}
+
 function renderDashboard(){
   const t = currentTutor;
   document.getElementById('dashAvatar').style.background = colorFor(t.name);
@@ -1662,19 +1701,24 @@ function renderDashboard(){
     `;
     return;
   }
-  list.innerHTML = myBookings.map(b => `
-    <div class="booking-card">
-      <div class="who">
-        <b>${b.parentName}</b>
-        <small>${b.childGrade} · ${b.parentEmail}</small>
+  list.innerHTML = myBookings.map(b => {
+    const statusText = getBookingStatusText(b.status);
+    const statusClass = getBookingStatusClass(b.status);
+    return `
+      <div class="booking-card">
+        <div class="who">
+          <b>${b.parentName}</b>
+          <small>${b.childGrade} · ${b.parentEmail}</small>
+        </div>
+        <div class="booking-when">${b.day} · ${b.slot}</div>
+        <div class="booking-status ${statusClass}">${statusText}</div>
+        <div class="booking-actions">
+          <a class="icon-btn" title="Message on WhatsApp" href="${waLink(b.parentWhatsapp, 'Hello ' + b.parentName + ', this is ' + t.name + ' from Shule AI Plus regarding your ' + b.day + ' ' + b.slot + ' session.')}" target="_blank" rel="noopener">${waIcon()}</a>
+          <a class="icon-btn" title="Email parent" href="mailto:${b.parentEmail}?subject=Your%20Shule%20AI%20Plus%20session">${mailIcon()}</a>
+        </div>
       </div>
-      <div class="booking-when">${b.day} · ${b.slot}</div>
-      <div class="booking-actions">
-        <a class="icon-btn" title="Message on WhatsApp" href="${waLink(b.parentWhatsapp, 'Hello ' + b.parentName + ', this is ' + t.name + ' from Shule AI Plus regarding your ' + b.day + ' ' + b.slot + ' session.')}" target="_blank" rel="noopener">${waIcon()}</a>
-        <a class="icon-btn" title="Email parent" href="mailto:${b.parentEmail}?subject=Your%20Shule%20AI%20Plus%20session">${mailIcon()}</a>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 /* ===================================================================

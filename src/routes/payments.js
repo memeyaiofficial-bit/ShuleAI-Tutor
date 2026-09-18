@@ -318,6 +318,15 @@ router.post('/mpesa/callback', async (req, res, next) => {
 
     if (paymentResult.rows.length > 0) {
       const payment = paymentResult.rows[0];
+      if (payment.booking_id) {
+        const bookingStatus = resultCode === 0 ? 'Confirmed' : cancelledCodes.includes(String(resultCode)) ? 'Cancelled' : 'Cancelled';
+        await query(
+          `UPDATE bookings
+           SET status = $1
+           WHERE id = $2`,
+          [bookingStatus, payment.booking_id]
+        );
+      }
       if (payment.tutor_id) {
         if (resultCode === 0) {
           await query(
