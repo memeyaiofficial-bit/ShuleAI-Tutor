@@ -461,7 +461,7 @@
     <div class="nav-links" id="navLinks">
       <a class="nav-link" data-view="home">Home</a>
       <a class="nav-link" data-view="home" data-scroll="teachers">Find a Tutor</a>
-      <a class="nav-link" data-view="become">Become a Tutor</a>
+      <a class="nav-link" data-view="become">Book a Tutor</a>
       <a class="nav-link" data-view="login">Tutor Login</a>
     </div>
   </div>
@@ -479,7 +479,7 @@
         <p class="hero-sub">Book vetted, TSC-registered teachers for one-on-one sessions in Maths, Sciences, English, Kiswahili and every CBC subject — in your county, at a time that works for you.</p>
         <div class="hero-ctas">
           <a href="#teachers" class="btn btn-primary">Find a Tutor</a>
-          <a href="#" class="btn btn-outline-light" data-view="become">Become a Tutor</a>
+          <a href="#" class="btn btn-outline-light" data-view="become">Book a Tutor</a>
         </div>
         <div class="hero-stats">
           <div class="hero-stat"><b>1,240+</b><span>Verified tutors</span></div>
@@ -1199,7 +1199,7 @@ function renderBookingStep3(){
     const text = document.getElementById('bookingStkText');
     status.classList.add('is-visible');
     status.classList.remove('success');
-    text.textContent = 'Creating booking and sending M-Pesa prompt…';
+    text.textContent = 'Creating booking and sending parent payment prompt…';
 
     try {
       const savedBooking = await finalizeBooking({ status: 'Pending Payment' });
@@ -1211,12 +1211,21 @@ function renderBookingStep3(){
           amount: bookingState.teacher.rate,
           phoneNumber: bookingState.parent.wa,
           purpose: 'booking_payment',
+          paymentContext: 'parent_booking',
         }),
       });
 
+      if (prompt && prompt.productionReady === false) {
+        status.classList.remove('success');
+        text.textContent = prompt.message || 'Parent booking M-Pesa is not active in this environment yet.';
+        toast(prompt.message || 'Parent booking M-Pesa is not active in this environment yet.');
+        e.target.disabled = false;
+        return;
+      }
+
       status.classList.add('success');
-      text.textContent = 'Prompt sent successfully — please approve it on your phone.';
-      toast(prompt?.message || 'M-Pesa prompt sent successfully.');
+      text.textContent = 'Parent booking prompt sent — please approve it on your phone.';
+      toast(prompt?.message || 'Parent booking prompt sent successfully.');
     } catch (error) {
       const pendingBooking = bookings.find((entry) =>
         entry.teacherId === bookingState.teacher.id &&
@@ -1228,8 +1237,8 @@ function renderBookingStep3(){
         pendingBooking.status = 'Cancelled';
       }
       status.classList.remove('success');
-      text.textContent = error.message || 'The payment prompt could not be sent.';
-      toast(error.message || 'The payment prompt could not be sent.');
+      text.textContent = error.message || 'The parent booking payment prompt could not be sent.';
+      toast(error.message || 'The parent booking payment prompt could not be sent.');
       e.target.disabled = false;
     }
   });
@@ -1257,15 +1266,6 @@ async function finalizeBooking(options = {}){
     });
     const savedBooking = normalizeBookingRow(saved.booking || saved);
     bookings.push(savedBooking);
-
-    const tutorMessage = saved.tutorMessage || `Hi ${t.name}, ${bookingState.parent.name} has booked a session with you on ${bookingState.day} at ${SLOTS[bookingState.slotIdx]}. Please contact ${bookingState.parent.wa}.`;
-    const tutorWhatsapp = saved.tutorWhatsapp || t.whatsapp;
-
-    if (tutorWhatsapp) {
-      const messageUrl = waLink(tutorWhatsapp, tutorMessage);
-      window.open(messageUrl, '_blank', 'noopener,noreferrer');
-    }
-
     return savedBooking;
   } catch (error) {
     const fallbackBooking = {
@@ -1442,18 +1442,23 @@ document.getElementById('paySTKBtn').addEventListener('click', async (e)=>{
     const result = await apiFetch('/api/payments/mpesa/initiate', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ amount: 1000, phoneNumber: phone, purpose: 'annual_fee' }),
+      body: JSON.stringify({
+        amount: 1000,
+        phoneNumber: phone,
+        purpose: 'annual_fee',
+        paymentContext: 'tutor_registration',
+      }),
     });
 
     if (result && result.productionReady === false) {
-      text.textContent = result.message || 'M-Pesa is not configured for this environment yet.';
+      text.textContent = result.message || 'Tutor registration M-Pesa is not configured for this environment yet.';
       button.disabled = false;
       button.textContent = 'Send M-Pesa Prompt';
-      toast('M-Pesa is not active yet. Add the Daraja credentials in Render to enable live STK pushes.');
+      toast('Tutor registration M-Pesa is not active yet. Add the Daraja credentials in Render to enable live STK pushes.');
       return;
     }
 
-    text.textContent = 'STK push sent. Waiting for the M-Pesa confirmation callback…';
+    text.textContent = 'Tutor registration STK push sent. Waiting for the M-Pesa confirmation callback…';
     button.textContent = 'Waiting for confirmation…';
     tutorFeePaid = false;
     document.getElementById('submitTutorBtn').disabled = true;

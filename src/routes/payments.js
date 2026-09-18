@@ -122,6 +122,7 @@ router.post('/mpesa/initiate', async (req, res, next) => {
       amount,
       phoneNumber,
       purpose = 'annual_fee',
+      paymentContext,
       bookingId = null,
       tutorId: tutorIdFromBody,
     } = req.body;
@@ -130,10 +131,16 @@ router.post('/mpesa/initiate', async (req, res, next) => {
       return res.status(400).json({ message: 'Amount and phone number are required.' });
     }
 
+    const normalizedPurpose = String(purpose || 'annual_fee').toLowerCase();
+    const normalizedContext = String(paymentContext || (normalizedPurpose === 'booking_payment' ? 'parent_booking' : 'tutor_registration')).toLowerCase();
     const tutorId = req.user ? Number(req.user.sub) : Number(tutorIdFromBody ?? req.body.tutor_id ?? req.body.tutorId);
 
     if (!tutorId || Number.isNaN(tutorId)) {
       return res.status(400).json({ message: 'Tutor id is required for the payment prompt.' });
+    }
+
+    if (normalizedContext === 'parent_booking' && !bookingId) {
+      return res.status(400).json({ message: 'Booking id is required for the parent booking payment prompt.' });
     }
 
     const normalizedAmount = Number(amount);
@@ -165,9 +172,9 @@ router.post('/mpesa/initiate', async (req, res, next) => {
         phoneNumber,
         normalizedAmount,
         paymentStatus,
-        purpose,
+        normalizedPurpose,
         transactionReference,
-        hasDarajaConfig() ? 'STK push queued for Daraja.' : 'Daraja config missing. Ready for deployment replacement.',
+        hasDarajaConfig() ? `STK push queued for ${normalizedContext}.` : 'Daraja config missing. Ready for deployment replacement.',
       ]
     );
 
@@ -190,7 +197,8 @@ router.post('/mpesa/initiate', async (req, res, next) => {
       tutorId,
       amount: normalizedAmount,
       phoneNumber,
-      purpose,
+      purpose: normalizedPurpose,
+      paymentContext: normalizedContext,
       transactionReference,
       callbackUrl: process.env.MPESA_CALLBACK_URL || 'https://example.com/mpesa/callback',
       darajaEnv: process.env.MPESA_ENVIRONMENT || 'sandbox',
@@ -318,8 +326,8 @@ router.post('/mpesa/callback', async (req, res, next) => {
 
     if (paymentResult.rows.length > 0) {
       const payment = paymentResult.rows[0];
-      if (payment.booking_id) {
-        const bookingStatus = resultCode === 0 ? 'Confirmed' : cancelledCodes.includes(String(resultCode)) ? 'Cancelled' : 'Cancelled';
+      if (payment.booking_id && String(payment.purpose || '').toLowerCase() === 'booking_payment') {
+        const bookingStatus = resultCode === 0 ? 'Confirmed' : 'Cancelled';
         await query(
           `UPDATE bookings
            SET status = $1
@@ -327,7 +335,7 @@ router.post('/mpesa/callback', async (req, res, next) => {
           [bookingStatus, payment.booking_id]
         );
       }
-      if (payment.tutor_id) {
+      if (payment.tutor_id && String(payment.purpose || '').toLowerCase() === 'annual_fee') {
         if (resultCode === 0) {
           await query(
             `UPDATE tutors
