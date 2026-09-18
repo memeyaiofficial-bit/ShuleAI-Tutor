@@ -284,6 +284,22 @@
               <label for="subjects">Subjects</label>
               <input id="subjects" name="subjects" placeholder="Math, Physics, Biology" />
             </div>
+            <div class="field">
+              <label for="tscNumber">TSC Number (optional)</label>
+              <input id="tscNumber" name="tscNumber" placeholder="123456" />
+            </div>
+            <div class="field">
+              <label for="idNumber">ID Number (optional)</label>
+              <input id="idNumber" name="idNumber" placeholder="A12345678" />
+            </div>
+            <div class="field">
+              <label for="availability">Availability (JSON)</label>
+              <textarea id="availability" name="availability" placeholder='{"Mon":[true,false,...]}' rows="4"></textarea>
+            </div>
+            <div class="field">
+              <label for="holidays">Holidays (comma-separated dates YYYY-MM-DD)</label>
+              <input id="holidays" name="holidays" placeholder="2024-12-25,2025-01-01" />
+            </div>
             <button type="submit" class="primary-btn">Add Tutor</button>
           </form>
         </aside>
