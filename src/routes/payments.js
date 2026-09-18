@@ -1,4 +1,5 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const { query } = require('../db');
 const { authRequired } = require('../auth');
 
@@ -133,9 +134,22 @@ router.post('/mpesa/initiate', async (req, res, next) => {
 
     const normalizedPurpose = String(purpose || 'annual_fee').toLowerCase();
     const normalizedContext = String(paymentContext || (normalizedPurpose === 'booking_payment' ? 'parent_booking' : 'tutor_registration')).toLowerCase();
-    const tutorId = req.user ? Number(req.user.sub) : Number(tutorIdFromBody ?? req.body.tutor_id ?? req.body.tutorId);
 
-    if (!tutorId || Number.isNaN(tutorId)) {
+    let decodedUser = null;
+    const authHeader = req.headers.authorization || '';
+    if (authHeader.startsWith('Bearer ')) {
+      try {
+        decodedUser = jwt.verify(authHeader.split(' ')[1], process.env.JWT_SECRET || 'shule-tutor-dev-secret-change-me');
+      } catch (error) {
+        decodedUser = null;
+      }
+    }
+
+    const tutorId = decodedUser
+      ? Number(decodedUser.sub)
+      : Number(tutorIdFromBody ?? req.body.tutor_id ?? req.body.tutorId ?? null);
+
+    if (normalizedContext !== 'tutor_registration' && (!tutorId || Number.isNaN(tutorId))) {
       return res.status(400).json({ message: 'Tutor id is required for the payment prompt.' });
     }
 
