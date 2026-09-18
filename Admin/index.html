@@ -548,9 +548,10 @@
             .map((subject) => subject.trim())
             .filter(Boolean),
           availability: (() => {
+            const val = formData.get('availability');
+            if (!val || !val.toString().trim()) return {};
             try {
-              const val = formData.get('availability');
-              return val ? JSON.parse(val) : {};
+              return JSON.parse(val);
             } catch (e) {
               console.warn('Invalid availability JSON, defaulting to empty');
               return {};
